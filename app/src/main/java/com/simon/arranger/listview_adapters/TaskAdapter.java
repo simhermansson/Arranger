@@ -1,10 +1,13 @@
 package com.simon.arranger.listview_adapters;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.TextView;
 import com.simon.arranger.R;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
@@ -30,9 +33,9 @@ public class TaskAdapter extends ArrayAdapter<Task> {
     }
 
     static class ViewHolderItem {
-        /*
         TextView taskName;
-        */
+        TextView taskDate;
+        Button taskCheck;
     }
 
     @Override
@@ -43,16 +46,19 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             convertView = LayoutInflater.from(context).inflate(R.layout.task_view, parent, false);
 
             viewHolder = new ViewHolderItem();
+            viewHolder.taskName = (TextView) convertView.findViewById(R.id.taskName);
+            viewHolder.taskDate = (TextView) convertView.findViewById(R.id.taskDate);
+            viewHolder.taskCheck = (Button) convertView.findViewById(R.id.taskCheck);
             convertView.setTag(viewHolder);
 
         } else {
             viewHolder = (ViewHolderItem) convertView.getTag();
         }
 
-        final View view = convertView;
         final Task task = getItem(position);
         if (task != null) {
-            //Set views
+            viewHolder.taskName.setText(task.getName());
+            viewHolder.taskDate.setText(task.getDate().toString());
         }
 
         return convertView;
