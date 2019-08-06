@@ -14,5 +14,6 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name" />
+        <!--android:minWidth-->
 
 </RelativeLayout>
