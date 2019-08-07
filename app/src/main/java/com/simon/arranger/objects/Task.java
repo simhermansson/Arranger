@@ -1,19 +1,19 @@
 package com.simon.arranger.objects;
 
-import java.time.LocalTime;
 import java.util.Date;
 
 public class Task {
-    private String name;
-    private Date date;
+    private String task_name;
+    private String task_time;
+    private Date date = new Date();
 
-    public Task(String name, Date date) {
-        this.name = name;
-        this.date = date;
+    public Task(String task_name, String task_time) {
+        this.task_name = task_name;
+        this.task_time = task_time;
     }
 
     public String getName() {
-        return name;
+        return task_name;
     }
 
     public Date getDate() {
