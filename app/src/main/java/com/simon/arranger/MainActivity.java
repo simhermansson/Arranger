@@ -1,12 +1,14 @@
 package com.simon.arranger;
 
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import com.google.gson.Gson;
@@ -25,12 +27,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private enum State {
+        TODAY, WEEK
+    }
+    private State currentState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Set initial state
+        currentState = State.TODAY;
+
+        //Set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -47,9 +57,52 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Set first fragment in FrameLayout to TodayFragment
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.placeholder, new TodayFragment());
         ft.commit();
+
+        //Set first menu item as checked, this case the today item
+        final NavigationView navigationView = findViewById(R.id.navigation);
+        navigationView.getMenu().getItem(0).setChecked(true);
+
+        //Set click listeners for menu items in drawer view
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                        //Initialize FragmentTransaction for changing of fragments
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+                        //Check the pressed menu item
+                        //And initialize and switch to that fragment
+                        menuItem.setChecked(true);
+                        switch(menuItem.getItemId()) {
+                            case R.id.nav_day:
+                                if (!State.TODAY.equals(currentState)) {
+                                    ft.replace(R.id.placeholder, new TodayFragment());
+                                    ft.commit();
+                                    currentState = State.TODAY;
+                                }
+                                break;
+                            case R.id.nav_week:
+                                if (!State.WEEK.equals(currentState)) {
+                                    ft.replace(R.id.placeholder, new WeekFragment());
+                                    ft.commit();
+                                    currentState = State.WEEK;
+                                }
+                                break;
+                        }
+
+                        //Close drawer
+                        DrawerLayout drawerLayout = findViewById(R.id.drawer);
+                        drawerLayout.closeDrawer(GravityCompat.START);
+
+                        return true;
+                    }
+                }
+        );
+
     }
 
     public void writeToInternalStorage(String fileName, ArrayList<Task> arrayList) {

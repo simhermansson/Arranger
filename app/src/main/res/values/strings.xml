@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Arranger</string>
     <string name="today">Today</string>
+    <string name="week">Week</string>
     <string name="task_name">Name</string>
     <string name="task_time">When?</string>
+    <string name="placeholder">Placeholder</string>
+    <string name="anytime">Anytime</string>
 </resources>

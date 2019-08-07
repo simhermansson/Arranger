@@ -19,7 +19,7 @@ import com.simon.arranger.listview_adapters.TaskAdapter;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
 
-public class TodayFragment extends Fragment {
+public class WeekFragment extends Fragment {
     private MainActivity activity;
     private static final String JSON_FILE = "tasks_today.json";
     private ArrayList<Task> taskList;
@@ -35,7 +35,7 @@ public class TodayFragment extends Fragment {
         View view = inflater.inflate(R.layout.today_fragment, container, false);
 
         //Set title of toolbar
-        activity.setTitle("Today");
+        activity.setTitle("Week");
 
         //Read tasks from memory and assign them to taskList
         taskList = activity.readFromInternalStorage(JSON_FILE);

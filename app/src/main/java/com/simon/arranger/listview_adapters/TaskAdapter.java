@@ -1,12 +1,15 @@
 package com.simon.arranger.listview_adapters;
 
 import android.content.Context;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v7.widget.AppCompatImageButton;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 import com.simon.arranger.MainActivity;
 import com.simon.arranger.R;
@@ -38,7 +41,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
     static class ViewHolderItem {
         TextView taskName;
-        TextView taskDate;
+        TextView taskTime;
         AppCompatImageButton taskCheck;
     }
 
@@ -51,7 +54,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
             viewHolder = new ViewHolderItem();
             viewHolder.taskName = (TextView) convertView.findViewById(R.id.taskName);
-            viewHolder.taskDate = (TextView) convertView.findViewById(R.id.taskDate);
+            viewHolder.taskTime = (TextView) convertView.findViewById(R.id.taskTime);
             viewHolder.taskCheck = (AppCompatImageButton) convertView.findViewById(R.id.taskCheck);
             convertView.setTag(viewHolder);
 
@@ -62,13 +65,19 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         final Task task = getItem(position);
         if (task != null) {
             viewHolder.taskName.setText(task.getName());
-            viewHolder.taskDate.setText(task.getDate().toString());
+            if (!"".equals(task.getTime())) {
+                viewHolder.taskTime.setText(task.getTime());
+            }
             viewHolder.taskCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //Remove task from taskList, notify the adapter and write new list to storage
                     tasks.remove(task);
                     notifyDataSetChanged();
                     mainActivity.writeToInternalStorage(JSON_FILE, tasks);
+
+                    //Haptic feedback on press
+                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
             });
         }
