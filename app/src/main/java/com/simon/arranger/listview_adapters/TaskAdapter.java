@@ -1,13 +1,14 @@
 package com.simon.arranger.listview_adapters;
 
 import android.content.Context;
-import android.text.format.DateFormat;
+import android.support.v7.widget.AppCompatImageButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import com.simon.arranger.MainActivity;
 import com.simon.arranger.R;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
@@ -15,11 +16,14 @@ import java.util.ArrayList;
 public class TaskAdapter extends ArrayAdapter<Task> {
     private Context context;
     private ArrayList<Task> tasks;
+    private MainActivity mainActivity;
+    private static final String JSON_FILE = "tasks_today.json";
 
     public TaskAdapter(ArrayList<Task> tasks, Context context) {
         super(context, R.layout.task_view, tasks);
         this.context = context;
         this.tasks = tasks;
+        mainActivity = (MainActivity) context;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
     static class ViewHolderItem {
         TextView taskName;
         TextView taskDate;
-        Button taskCheck;
+        AppCompatImageButton taskCheck;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             viewHolder = new ViewHolderItem();
             viewHolder.taskName = (TextView) convertView.findViewById(R.id.taskName);
             viewHolder.taskDate = (TextView) convertView.findViewById(R.id.taskDate);
-            viewHolder.taskCheck = (Button) convertView.findViewById(R.id.taskCheck);
+            viewHolder.taskCheck = (AppCompatImageButton) convertView.findViewById(R.id.taskCheck);
             convertView.setTag(viewHolder);
 
         } else {
@@ -59,6 +63,14 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         if (task != null) {
             viewHolder.taskName.setText(task.getName());
             viewHolder.taskDate.setText(task.getDate().toString());
+            viewHolder.taskCheck.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tasks.remove(task);
+                    notifyDataSetChanged();
+                    mainActivity.writeToInternalStorage(JSON_FILE, tasks);
+                }
+            });
         }
 
         return convertView;
