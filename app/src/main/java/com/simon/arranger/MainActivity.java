@@ -6,6 +6,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import com.google.gson.Gson;
@@ -112,7 +113,12 @@ public class MainActivity extends AppCompatActivity {
 
         //Convert saved JsonArray of tasks into a list of tasks and return it
         Type listType = new TypeToken<List<Task>>(){}.getType();
-        return gson.fromJson(jsonString, listType);
+        ArrayList<Task> arrayList = new ArrayList<>();
+        ArrayList<Task> storageList = gson.fromJson(jsonString, listType);
+        if (storageList != null) {
+            arrayList = storageList;
+        }
+        return arrayList;
     }
 
 }

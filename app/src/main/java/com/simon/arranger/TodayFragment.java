@@ -22,7 +22,7 @@ import java.util.ArrayList;
 public class TodayFragment extends Fragment {
     private MainActivity activity;
     private static final String JSON_FILE = "tasks_today.json";
-    private ArrayList<Task> taskList = new ArrayList<>();
+    private ArrayList<Task> taskList;
     private TaskAdapter taskAdapter;
 
     @Override
