@@ -1,9 +1,6 @@
 package com.simon.arranger.listview_adapters;
 
 import android.content.Context;
-import android.os.Build;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
@@ -11,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import com.simon.arranger.MainActivity;
+import com.simon.arranger.activity.MainActivity;
 import com.simon.arranger.R;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;

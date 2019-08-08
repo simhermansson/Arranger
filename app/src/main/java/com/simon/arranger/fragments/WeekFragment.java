@@ -1,4 +1,4 @@
-package com.simon.arranger;
+package com.simon.arranger.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -6,24 +6,17 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ListView;
-import com.simon.arranger.listview_adapters.TaskAdapter;
-import com.simon.arranger.objects.Task;
-import java.util.ArrayList;
+import com.simon.arranger.activity.MainActivity;
+import com.simon.arranger.R;
 
-public class TodayFragment extends Fragment {
+public class WeekFragment extends Fragment {
     private MainActivity activity;
-    private static final String JSON_FILE = "tasks_today.json";
-    private ArrayList<Task> taskList;
-    private TaskAdapter taskAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,18 +25,10 @@ public class TodayFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.today_fragment, container, false);
+        View view = inflater.inflate(R.layout.week_fragment, container, false);
 
         //Set title of toolbar
-        activity.setTitle("Today");
-
-        //Read tasks from memory and assign them to taskList
-        taskList = activity.readFromInternalStorage(JSON_FILE);
-
-        //Set up ListView
-        ListView listView = view.findViewById(R.id.taskList);
-        taskAdapter = new TaskAdapter(taskList, activity);
-        listView.setAdapter(taskAdapter);
+        activity.setTitle("Week");
 
         //Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
@@ -88,25 +73,5 @@ public class TodayFragment extends Fragment {
         //Open keyboard
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-
-        //Handle dialog inputs
-        final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputTaskName);
-        final EditText inputDialogEditTaskTime = inputDialog.findViewById(R.id.inputTaskTime);
-        AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
-        inputDialogImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String taskName = inputDialogEditTaskName.getText().toString();
-                String taskTime = inputDialogEditTaskTime.getText().toString();
-                Task task = new Task(taskName, taskTime);
-                //Add task to taskList and tell taskAdapter to update
-                taskList.add(task);
-                taskAdapter.notifyDataSetChanged();
-                //Save new task to internal storage
-                activity.writeToInternalStorage(JSON_FILE, taskList);
-
-                inputDialog.cancel();
-            }
-        });
     }
 }

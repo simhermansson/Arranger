@@ -1,4 +1,4 @@
-package com.simon.arranger;
+package com.simon.arranger.activity;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -13,6 +13,10 @@ import android.view.View;
 import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.simon.arranger.R;
+import com.simon.arranger.fragments.ScriptsFragment;
+import com.simon.arranger.fragments.TodayFragment;
+import com.simon.arranger.fragments.WeekFragment;
 import com.simon.arranger.objects.Task;
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +32,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private enum State {
-        TODAY, WEEK
+        TODAY, WEEK, SCRIPTS
     }
     private State currentState;
 
@@ -90,6 +94,13 @@ public class MainActivity extends AppCompatActivity {
                                     ft.replace(R.id.placeholder, new WeekFragment());
                                     ft.commit();
                                     currentState = State.WEEK;
+                                }
+                                break;
+                            case R.id.nav_scripts:
+                                if (!State.SCRIPTS.equals(currentState)) {
+                                    ft.replace(R.id.placeholder, new ScriptsFragment());
+                                    ft.commit();
+                                    currentState = State.SCRIPTS;
                                 }
                                 break;
                         }

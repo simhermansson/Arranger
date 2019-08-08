@@ -6,4 +6,6 @@
     <string name="task_time">When?</string>
     <string name="placeholder">Placeholder</string>
     <string name="anytime">Anytime</string>
+    <string name="scripts">Scripts</string>
+    <string name="task_hint">E.g. \"Laundry at 14:20\"</string>
 </resources>
