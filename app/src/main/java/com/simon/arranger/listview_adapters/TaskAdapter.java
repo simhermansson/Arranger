@@ -62,9 +62,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         final Task task = getItem(position);
         if (task != null) {
             viewHolder.taskName.setText(task.getName());
-            if (!"".equals(task.getTime())) {
-                viewHolder.taskTime.setText(task.getTime());
-            }
+            viewHolder.taskTime.setText(task.getTime());
             viewHolder.taskCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

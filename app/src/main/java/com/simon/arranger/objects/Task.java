@@ -1,5 +1,7 @@
 package com.simon.arranger.objects;
 
+import com.simon.arranger.enums.Repeat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,16 +10,10 @@ import java.util.regex.Pattern;
 
 public class Task {
     private String name;
-    private String time;
     private Date date;
-
-    private enum InterpretState {
-        NAME, TIME, WHEN
-    }
-    private InterpretState currentInterpretState;
+    private Repeat repeats;
 
     public Task(String input) {
-        currentInterpretState = InterpretState.NAME;
         parseInput(input);
     }
 
@@ -26,47 +22,87 @@ public class Task {
     }
 
     public String getTime() {
-        return time;
-    }
-
-    public Date getDate() {
-        return date;
+        if (date != null) {
+            return SimpleDateFormat.getTimeInstance(SimpleDateFormat.DATE_FIELD).format(date);
+        }
+        return "Anytime";
     }
 
     private void parseInput(String input) {
         try {
-            //Regex Strings
-            String HH = "(0[0-9]|1[0-9]|2[0-9]|[0-9])";
-            String MM = "([:.,][0-5][0-9])";
-            String HHMM = "(" + HH + MM + ")";
-            String AM = "(" + HH + MM + "?\\s?[Aa][Mm])";
-            String PM = "(" + HH + MM + "?\\s?[Pp][Mm])";
-            String TIMES = "(" + HHMM + "|" + AM + "|" + PM + "|" + HH + ")";
-            String SPLITNUMALP = "[AaPp]";
-            String SENTENCE = "^(.+)(at\\s+)" + TIMES + "(.*)";
+            //Regex for time
+            String hours = "(0[0-9]|1[0-9]|2[0-9]|[0-9])";
+            String dividers = "[:.,]";
+            String minutes = "([0-5][0-9])";
+            String amPm = "\\s?([AaPp][Mm])";
+            String hoursAndMinutes = "(" + hours + dividers + "?" + minutes + "?" + amPm + "?)";
+            //Regex for taskName
+            String taskName = "^(.+)at+\\s+";
+            //Regex for taskRepeat
+            String taskRepeat = "\\s?(.*)$";
+            //Putting the regex together so I can extract the variables below
+            String taskPattern =  taskName + hoursAndMinutes + "?" + taskRepeat + "?";
 
-            Pattern pattern = Pattern.compile(SENTENCE);
+            //Find name, time and repetitions by regex
+            String time = null;
+            String hour = null;
+            String minute = null;
+            String twelveHourTime = null;
+            String repeat = null;
+            Pattern pattern = Pattern.compile(taskPattern);
             Matcher matcher = pattern.matcher(input);
             while (matcher.find()) {
+                //Set taskName
                 name = matcher.group(1);
-                time = matcher.group(3);
+
+                //Set local variables to time and repeat matches
+                time = matcher.group(2);
+                hour = matcher.group(3);
+                minute = matcher.group(4);
+                twelveHourTime = matcher.group(5);
+                repeat = matcher.group(6);
             }
 
             //Parse the time format
-            if (time.matches(HHMM)) {
-                this.time = time;
-                date = new SimpleDateFormat("hh:mm").parse(time);
-            } else if (time.matches(AM)) {
-                this.time = time.split(SPLITNUMALP)[0];
-                date = new SimpleDateFormat("hh").parse(time.split(SPLITNUMALP)[0]);
-            } else if (time.matches(PM)) {
-                this.time = time.split(SPLITNUMALP)[0];
-                date = new SimpleDateFormat("hh").parse(time.split(SPLITNUMALP)[0]);
-            } else if (time.matches(HH)) {
-                this.time = time.split(SPLITNUMALP)[0];
-                date = new SimpleDateFormat("hh").parse(time.split(SPLITNUMALP)[0]);
-            } else {
-                this.time = "Woops";
+            if (time != null) {
+
+                if (hour != null) {
+                    if (minute != null) {
+                        time = hour + ":" + minute;
+                    } else {
+                        time = hour + ":00";
+                    }
+                } else {
+                    date = null;
+                }
+
+                if (twelveHourTime != null) {
+                    date = new SimpleDateFormat("hh:mm aa").parse(time + " " + twelveHourTime);
+                } else {
+                    date = new SimpleDateFormat("hh:mm").parse(time);
+                }
+
+            }
+
+            //Parse repetitions
+            if (repeat != null) {
+                switch (repeat) {
+                    case "every day":
+                        repeats = Repeat.DAILY;
+                        break;
+                    case "every week":
+                        repeats = Repeat.WEEKLY;
+                        break;
+                    case "every month":
+                        repeats = Repeat.MONTHLY;
+                        break;
+                    case "every year":
+                        repeats = Repeat.YEARLY;
+                        break;
+                    default:
+                        repeats = Repeat.NO;
+                        break;
+                }
             }
 
         } catch (ParseException e) {
