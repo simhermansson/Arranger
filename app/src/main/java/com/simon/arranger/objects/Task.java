@@ -32,16 +32,16 @@ public class Task {
         try {
             //Regex for time
             String hours = "(0[0-9]|1[0-9]|2[0-9]|[0-9])";
-            String dividers = "[:.,]";
-            String minutes = "([0-5][0-9])";
-            String amPm = "\\s?([AaPp][Mm])";
-            String hoursAndMinutes = "(" + hours + dividers + "?" + minutes + "?" + amPm + "?)";
+            String dividers = "[:.,]?";
+            String minutes = "([0-5][0-9])?";
+            String amPm = "\\s?([AaPp][Mm])?";
+            String hoursAndMinutes = "(" + hours + dividers + minutes + amPm + ")?";
             //Regex for taskName
-            String taskName = "^(.+)at+\\s+";
+            String taskName = "(.+?(?=\\bat\\b|\\b[0-9]|$))(?:at\\s)?";
             //Regex for taskRepeat
-            String taskRepeat = "\\s?(.*)$";
+            String taskRepeat = "\\s?(.+)?";
             //Putting the regex together so I can extract the variables below
-            String taskPattern =  taskName + hoursAndMinutes + "?" + taskRepeat + "?";
+            String taskPattern =  taskName + hoursAndMinutes + taskRepeat;
 
             //Find name, time and repetitions by regex
             String time = null;
@@ -90,14 +90,26 @@ public class Task {
                     case "every day":
                         repeats = Repeat.DAILY;
                         break;
-                    case "every week":
-                        repeats = Repeat.WEEKLY;
+                    case "every monday":
+                        repeats = Repeat.MONDAY;
                         break;
-                    case "every month":
-                        repeats = Repeat.MONTHLY;
+                    case "every tuesday":
+                        repeats = Repeat.TUESDAY;
                         break;
-                    case "every year":
-                        repeats = Repeat.YEARLY;
+                    case "every wednesday":
+                        repeats = Repeat.WEDNESDAY;
+                        break;
+                    case "every thursday":
+                        repeats = Repeat.THURSDAY;
+                        break;
+                    case "every friday":
+                        repeats = Repeat.FRIDAY;
+                        break;
+                    case "every saturday":
+                        repeats = Repeat.SATURDAY;
+                        break;
+                    case "every sunday":
+                        repeats = Repeat.SUNDAY;
                         break;
                     default:
                         repeats = Repeat.NO;
