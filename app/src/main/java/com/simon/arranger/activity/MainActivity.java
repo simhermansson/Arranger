@@ -14,8 +14,6 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.simon.arranger.R;
-import com.simon.arranger.fragments.ScriptsFragment;
-import com.simon.arranger.fragments.TemplatesFragment;
 import com.simon.arranger.fragments.TodayFragment;
 import com.simon.arranger.fragments.WeekFragment;
 import com.simon.arranger.objects.Task;
@@ -33,7 +31,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private enum State {
-        TODAY, WEEK, TEMPLATES, SCRIPTS
+        TODAY, WEEK
     }
     private State currentState;
 
@@ -97,20 +95,6 @@ public class MainActivity extends AppCompatActivity {
                                     currentState = State.WEEK;
                                 }
                                 break;
-                            case R.id.nav_templates:
-                                if (!State.TEMPLATES.equals(currentState)) {
-                                    ft.replace(R.id.placeholder, new TemplatesFragment());
-                                    ft.commit();
-                                    currentState = State.TEMPLATES;
-                                }
-                                break;
-                            case R.id.nav_scripts:
-                                if (!State.SCRIPTS.equals(currentState)) {
-                                    ft.replace(R.id.placeholder, new ScriptsFragment());
-                                    ft.commit();
-                                    currentState = State.SCRIPTS;
-                                }
-                                break;
                         }
 
                         //Close drawer
@@ -126,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void writeToInternalStorage(String fileName, ArrayList<Task> arrayList) {
         //Get filepath and use it to create file
-        String filePath = getFilesDir() + "/" + fileName;
+        String filePath = getFilesDir() + "/f" + fileName;
         File file = new File(filePath);
 
         //Create JsonArray
@@ -151,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public ArrayList<Task> readFromInternalStorage(String fileName) {
+        fileName = "f" + fileName;
         Gson gson = new Gson();
         String jsonString = "";
         try {

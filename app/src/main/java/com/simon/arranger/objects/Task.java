@@ -115,10 +115,16 @@ public class Task {
                         repeats = Repeat.NO;
                         break;
                 }
+            } else {
+                repeats = Repeat.NO;
             }
 
         } catch (ParseException e) {
             System.out.println(e.toString());
         }
+    }
+
+    public Repeat getRepeats () {
+        return repeats;
     }
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.simon.arranger.activity.MainActivity;
 import com.simon.arranger.R;
 import com.simon.arranger.objects.Task;
+
 import java.util.ArrayList;
 
 public class TaskAdapter extends ArrayAdapter<Task> {

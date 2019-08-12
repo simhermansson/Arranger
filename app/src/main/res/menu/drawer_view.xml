@@ -9,13 +9,5 @@
             android:icon="@drawable/ic_filter_7_red_24dp"
             android:id="@+id/nav_week"
             android:title="@string/week" />
-        <item
-            android:icon="@drawable/ic_archive_red_24dp"
-            android:id="@+id/nav_templates"
-            android:title="@string/templates" />
-        <item
-            android:icon="@drawable/ic_code_red_24dp"
-            android:id="@+id/nav_scripts"
-            android:title="@string/scripts" />
     </group>
 </menu>
