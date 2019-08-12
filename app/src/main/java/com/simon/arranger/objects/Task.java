@@ -40,7 +40,7 @@ public class Task {
             String taskName = "(.+?(?=\\bat\\b|\\b[0-9]|$))(?:at\\s)?";
             //Regex for taskRepeat
             String taskRepeat = "\\s?(.+)?";
-            //Putting the regex together so I can extract the variables below
+            //Putting the regex together so the variables below can be extracted
             String taskPattern =  taskName + hoursAndMinutes + taskRepeat;
 
             //Find name, time and repetitions by regex

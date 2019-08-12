@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.simon.arranger.R;
 import com.simon.arranger.fragments.ScriptsFragment;
+import com.simon.arranger.fragments.TemplatesFragment;
 import com.simon.arranger.fragments.TodayFragment;
 import com.simon.arranger.fragments.WeekFragment;
 import com.simon.arranger.objects.Task;
@@ -32,7 +33,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private enum State {
-        TODAY, WEEK, SCRIPTS
+        TODAY, WEEK, TEMPLATES, SCRIPTS
     }
     private State currentState;
 
@@ -94,6 +95,13 @@ public class MainActivity extends AppCompatActivity {
                                     ft.replace(R.id.placeholder, new WeekFragment());
                                     ft.commit();
                                     currentState = State.WEEK;
+                                }
+                                break;
+                            case R.id.nav_templates:
+                                if (!State.TEMPLATES.equals(currentState)) {
+                                    ft.replace(R.id.placeholder, new TemplatesFragment());
+                                    ft.commit();
+                                    currentState = State.TEMPLATES;
                                 }
                                 break;
                             case R.id.nav_scripts:
