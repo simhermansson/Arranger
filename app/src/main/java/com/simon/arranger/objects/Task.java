@@ -112,11 +112,11 @@ public class Task {
                         repeats = Repeat.SUNDAY;
                         break;
                     default:
-                        repeats = Repeat.NO;
+                        repeats = Repeat.TODAY;
                         break;
                 }
             } else {
-                repeats = Repeat.NO;
+                repeats = Repeat.TODAY;
             }
 
         } catch (ParseException e) {

@@ -15,12 +15,10 @@ import com.simon.arranger.listview_adapters.WeekTaskExpandableAdapter;
 import com.simon.arranger.objects.Task;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 
 public class WeekFragment extends Fragment {
     private MainActivity activity;
-    private static final String JSON_FILE = "tasks_today.json";
     private WeekTaskExpandableAdapter weekTaskExpandableAdapter;
 
     private ArrayList<Task> todayList;
@@ -46,7 +44,7 @@ public class WeekFragment extends Fragment {
         activity.setTitle("Week");
 
         //Read tasks from storage and assign them to the correct lists
-        todayList = activity.readFromInternalStorage(JSON_FILE);
+        todayList = activity.readFromInternalStorage(Repeat.TODAY.toString() + ".json");
         everyDayList = activity.readFromInternalStorage(Repeat.DAILY.toString() + ".json");
         mondayList = activity.readFromInternalStorage(Repeat.MONDAY.toString() + ".json");
         tuesdayList = activity.readFromInternalStorage(Repeat.TUESDAY.toString() + ".json");

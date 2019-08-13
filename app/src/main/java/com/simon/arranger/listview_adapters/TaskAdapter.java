@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.simon.arranger.activity.MainActivity;
 import com.simon.arranger.R;
+import com.simon.arranger.enums.Repeat;
 import com.simon.arranger.objects.Task;
 
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ public class TaskAdapter extends ArrayAdapter<Task> {
     private Context context;
     private ArrayList<Task> tasks;
     private MainActivity mainActivity;
-    private static final String JSON_FILE = "tasks_today.json";
 
     public TaskAdapter(ArrayList<Task> tasks, Context context) {
         super(context, R.layout.task_view, tasks);
@@ -70,7 +70,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                     //Remove task from taskList, notify the adapter and write new list to storage
                     tasks.remove(task);
                     notifyDataSetChanged();
-                    mainActivity.writeToInternalStorage(JSON_FILE, tasks);
+                    mainActivity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", tasks);
 
                     //Haptic feedback on press
                     v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);

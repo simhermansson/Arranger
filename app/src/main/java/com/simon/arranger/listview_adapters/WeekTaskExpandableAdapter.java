@@ -2,6 +2,7 @@ package com.simon.arranger.listview_adapters;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageButton;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,6 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
     private HashMap<String, ArrayList<Task>> expandableTaskList;
     private ArrayList<String> expandableTitleList;
     private MainActivity mainActivity;
-    private static final String JSON_FILE = "tasks_today.json";
 
     public WeekTaskExpandableAdapter(HashMap<String, ArrayList<Task>> expandableTaskList, ArrayList<String> expandableTitleList, Context context) {
         this.context = context;
@@ -43,11 +43,11 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
     static class ChildViewHolderItem {
         TextView dayTask;
         TextView taskTime;
-        AppCompatImageButton taskCheck;
+        AppCompatImageButton taskRemove;
     }
 
     @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(final int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         final ChildViewHolderItem viewHolder;
 
         if (convertView == null) {
@@ -56,15 +56,31 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
             viewHolder = new ChildViewHolderItem();
             viewHolder.dayTask = (TextView) convertView.findViewById(R.id.taskName);
             viewHolder.taskTime = (TextView) convertView.findViewById(R.id.taskTime);
-            viewHolder.taskCheck = (AppCompatImageButton) convertView.findViewById(R.id.taskCheck);
+            viewHolder.taskRemove = (AppCompatImageButton) convertView.findViewById(R.id.taskRemove);
             convertView.setTag(viewHolder);
 
         } else {
             viewHolder = (ChildViewHolderItem) convertView.getTag();
         }
 
-        viewHolder.dayTask.setText(((Task)getChild(groupPosition, childPosition)).getName());
-        viewHolder.taskTime.setText(((Task)getChild(groupPosition, childPosition)).getTime());
+        final Task task = (Task) getChild(groupPosition, childPosition);
+        if (task != null) {
+            viewHolder.dayTask.setText(task.getName());
+            viewHolder.taskTime.setText(task.getTime());
+            viewHolder.taskRemove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Remove task from taskList, notify the adapter and write new list to storage
+                    expandableTaskList.get(expandableTitleList.get(groupPosition)).remove(task);
+                    notifyDataSetChanged();
+                    mainActivity.writeToInternalStorage(expandableTitleList.get(groupPosition) + ".json",
+                            expandableTaskList.get(expandableTitleList.get(groupPosition)));
+
+                    //Haptic feedback on press
+                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                }
+            });
+        }
 
         return convertView;
     }

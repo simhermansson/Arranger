@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 public class TodayFragment extends Fragment {
     private MainActivity activity;
-    private static final String JSON_FILE = "tasks_today.json";
     private ArrayList<Task> taskList;
     private TaskAdapter taskAdapter;
 
@@ -42,7 +41,7 @@ public class TodayFragment extends Fragment {
         activity.setTitle("Today");
 
         //Read tasks from memory and assign them to taskList
-        taskList = activity.readFromInternalStorage(JSON_FILE);
+        taskList = activity.readFromInternalStorage(Repeat.TODAY.toString() + ".json");
 
         //Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
@@ -107,11 +106,13 @@ public class TodayFragment extends Fragment {
                     Task task = new Task(taskInput);
                     //TODO Maybe move this down after notifyDataSetChanged if too slow
                     scheduleTask(task);
-                    taskList.add(task);
+                    if (Repeat.TODAY.equals(task.getRepeats())) {
+                        taskList.add(task);
+                    }
                     taskAdapter.notifyDataSetChanged();
 
                     //Save new task to internal storage and cancel dialog
-                    activity.writeToInternalStorage(JSON_FILE, taskList);
+                    activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
                     inputDialog.cancel();
                 } else {
                     //TODO Dialog closes on emulator but not on phone, check on more emulators
@@ -124,7 +125,7 @@ public class TodayFragment extends Fragment {
 
     private void scheduleTask(Task task) {
         Repeat repeat = task.getRepeats();
-        if (!Repeat.NO.equals(repeat)) {
+        if (!Repeat.TODAY.equals(repeat)) {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
@@ -133,7 +134,7 @@ public class TodayFragment extends Fragment {
 
     private void removeTaskFromSchedule(Task task) {
         Repeat repeat = task.getRepeats();
-        if (!Repeat.NO.equals(repeat)) {
+        if (!Repeat.TODAY.equals(repeat)) {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
             tasks.remove(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
