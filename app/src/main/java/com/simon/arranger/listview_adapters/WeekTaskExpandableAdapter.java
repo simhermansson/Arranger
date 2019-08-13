@@ -14,19 +14,18 @@ import com.simon.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
     private Context context;
     private HashMap<String, ArrayList<Task>> expandableTaskList;
-    List<String> expandableTitleList;
+    private ArrayList<String> expandableTitleList;
     private MainActivity mainActivity;
     private static final String JSON_FILE = "tasks_today.json";
 
-    public WeekTaskExpandableAdapter(HashMap<String, ArrayList<Task>> expandableTaskList, Context context) {
+    public WeekTaskExpandableAdapter(HashMap<String, ArrayList<Task>> expandableTaskList, ArrayList<String> expandableTitleList, Context context) {
         this.context = context;
         this.expandableTaskList = expandableTaskList;
-        expandableTitleList = new ArrayList<String>(expandableTaskList.keySet());
+        this.expandableTitleList = expandableTitleList;
         mainActivity = (MainActivity) context;
     }
 

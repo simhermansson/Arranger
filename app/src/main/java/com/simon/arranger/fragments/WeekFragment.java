@@ -15,6 +15,7 @@ import com.simon.arranger.listview_adapters.WeekTaskExpandableAdapter;
 import com.simon.arranger.objects.Task;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 public class WeekFragment extends Fragment {
@@ -67,9 +68,21 @@ public class WeekFragment extends Fragment {
         expandableTaskList.put(Repeat.SATURDAY.toString(), saturdayList);
         expandableTaskList.put(Repeat.SUNDAY.toString(), sundayList);
 
+        //Create and sort a list of the keys in the HashMap
+        ArrayList<String> expandableTitleList = new ArrayList<>();
+        expandableTitleList.add(Repeat.TODAY.toString());
+        expandableTitleList.add(Repeat.DAILY.toString());
+        expandableTitleList.add(Repeat.MONDAY.toString());
+        expandableTitleList.add(Repeat.TUESDAY.toString());
+        expandableTitleList.add(Repeat.WEDNESDAY.toString());
+        expandableTitleList.add(Repeat.THURSDAY.toString());
+        expandableTitleList.add(Repeat.FRIDAY.toString());
+        expandableTitleList.add(Repeat.SATURDAY.toString());
+        expandableTitleList.add(Repeat.SUNDAY.toString());
+
         //Set up ListView
         ExpandableListView expandableListView = view.findViewById(R.id.weekList);
-        weekTaskExpandableAdapter = new WeekTaskExpandableAdapter(expandableTaskList, activity);
+        weekTaskExpandableAdapter = new WeekTaskExpandableAdapter(expandableTaskList, expandableTitleList, activity);
         expandableListView.setAdapter(weekTaskExpandableAdapter);
 
         return view;
