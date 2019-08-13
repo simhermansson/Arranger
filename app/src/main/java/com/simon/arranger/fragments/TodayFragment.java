@@ -105,6 +105,7 @@ public class TodayFragment extends Fragment {
                 if (taskInput.length() > 0) {
                     //Create and add task to taskList and tell taskAdapter to update
                     Task task = new Task(taskInput);
+                    //TODO Maybe move this down after notifyDataSetChanged if too slow
                     scheduleTask(task);
                     taskList.add(task);
                     taskAdapter.notifyDataSetChanged();
@@ -126,6 +127,15 @@ public class TodayFragment extends Fragment {
         if (!Repeat.NO.equals(repeat)) {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
             tasks.add(task);
+            activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
+        }
+    }
+
+    private void removeTaskFromSchedule(Task task) {
+        Repeat repeat = task.getRepeats();
+        if (!Repeat.NO.equals(repeat)) {
+            ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
+            tasks.remove(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
         }
     }

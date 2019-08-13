@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void writeToInternalStorage(String fileName, ArrayList<Task> arrayList) {
         //Get filepath and use it to create file
-        String filePath = getFilesDir() + "/f" + fileName;
+        String filePath = getFilesDir() + "/" + fileName;
         File file = new File(filePath);
 
         //Create JsonArray
@@ -135,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public ArrayList<Task> readFromInternalStorage(String fileName) {
-        fileName = "f" + fileName;
         Gson gson = new Gson();
         String jsonString = "";
         try {
