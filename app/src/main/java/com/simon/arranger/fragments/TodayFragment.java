@@ -1,11 +1,16 @@
 package com.simon.arranger.fragments;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +27,8 @@ import com.simon.arranger.enums.Repeat;
 import com.simon.arranger.listview_adapters.TaskAdapter;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
+
+import static android.content.Context.ALARM_SERVICE;
 
 public class TodayFragment extends Fragment {
     private MainActivity activity;
@@ -129,15 +136,30 @@ public class TodayFragment extends Fragment {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
+
+            createNotification();
         }
     }
 
-    private void removeTaskFromSchedule(Task task) {
-        Repeat repeat = task.getRepeats();
-        if (!Repeat.TODAY.equals(repeat)) {
-            ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
-            tasks.remove(task);
-            activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
-        }
+    private void createNotification() {
+        // Create and explicit intent for an Activity in app
+        Intent intent = new Intent(activity, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
+
+        //Creating a notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, ALARM_SERVICE)
+                .setSmallIcon(R.drawable.ic_remove_grey_24dp)
+                .setContentTitle("textTitle")
+                .setContentText("textContent")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        //Send the notification
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(activity);
+
+        notificationManagerCompat.notify(2, builder.build());
     }
 }

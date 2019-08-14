@@ -82,6 +82,9 @@ public class WeekFragment extends Fragment {
         ExpandableListView expandableListView = view.findViewById(R.id.weekList);
         weekTaskExpandableAdapter = new WeekTaskExpandableAdapter(expandableTaskList, expandableTitleList, activity);
         expandableListView.setAdapter(weekTaskExpandableAdapter);
+        for (int i = 0; i < weekTaskExpandableAdapter.getGroupCount(); i++) {
+            expandableListView.expandGroup(i);
+        }
 
         return view;
     }
