@@ -2,13 +2,10 @@
     <string name="app_name">Arranger</string>
     <string name="today">Today</string>
     <string name="week">Week</string>
-    <string name="task_name">Name</string>
-    <string name="task_time">When?</string>
     <string name="placeholder">Placeholder</string>
     <string name="anytime">Anytime</string>
-    <string name="scripts">Scripts</string>
-    <string name="templates">Templates</string>
     <string name="task_hint">e.g. \"Laundry at 6pm every monday\"</string>
+    <string name="no_tasks">No more tasks for today!\nAdd more by pressing the red button below.</string>
     <string name="channel_name">ALARM_SERVICE</string>
     <string name="channel_description">ALARM_SERVICE</string>
 </resources>

@@ -2,8 +2,10 @@ package com.simon.arranger.objects;
 
 import com.simon.arranger.enums.Repeat;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,7 +79,6 @@ public class Task {
             if (time != null) {
 
                 if (hour != null) {
-
                     if (minute != null) {
                         time = hour + ":" + minute;
                     } else {
@@ -87,7 +88,7 @@ public class Task {
                     if (twelveHourTime != null) {
                         date = new SimpleDateFormat("hh:mm aa").parse(time + " " + twelveHourTime);
                     } else {
-                        date = new SimpleDateFormat("hh:mm").parse(time);
+                        date = new SimpleDateFormat("HH:mm").parse(time);
                     }
                     hasDate = true;
                 }

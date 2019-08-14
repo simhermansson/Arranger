@@ -32,7 +32,6 @@ import com.simon.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -96,6 +95,7 @@ public class TodayFragment extends Fragment {
 
         //Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
+        listView.setEmptyView(view.findViewById(R.id.list_empty));
         taskAdapter = new TaskAdapter(taskList, activity);
         listView.setAdapter(taskAdapter);
 
@@ -158,7 +158,8 @@ public class TodayFragment extends Fragment {
                     int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
                     if (Repeat.TODAY.equals(task.getRepeats())) {
                         taskList.add(task);
-                    } else if (task.getRepeats().equals(Repeat.values()[dayOfWeek])) {
+                    } else if (task.getRepeats().equals(Repeat.values()[dayOfWeek]) ||
+                            task.getRepeats().equals(Repeat.DAILY)) {
                         taskList.add(task);
                     }
                     taskAdapter.notifyDataSetChanged();
@@ -200,9 +201,9 @@ public class TodayFragment extends Fragment {
 
     private long getNotificationDelay(Task task) {
         // Get delay in milliseconds
-        Calendar todayCalendar = GregorianCalendar.getInstance();
-        Calendar taskCalendar = GregorianCalendar.getInstance();
-        taskCalendar.set(Calendar.HOUR, task.getDate().getHours());
+        Calendar todayCalendar = Calendar.getInstance();
+        Calendar taskCalendar = Calendar.getInstance();
+        taskCalendar.set(Calendar.HOUR_OF_DAY, task.getDate().getHours());
         taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
         taskCalendar.set(Calendar.SECOND, 0);
         return taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
@@ -216,10 +217,10 @@ public class TodayFragment extends Fragment {
 
         //Creating a notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, ALARM_SERVICE)
-                .setSmallIcon(R.drawable.ic_remove_grey_24dp)
+                .setSmallIcon(R.drawable.ic_notifications_grey_24dp)
                 .setContentTitle(task.getName())
                 .setContentText(task.getTime())
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.DEFAULT_ALL)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
