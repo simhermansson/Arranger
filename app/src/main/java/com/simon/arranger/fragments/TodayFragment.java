@@ -1,12 +1,15 @@
 package com.simon.arranger.fragments;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -25,6 +28,7 @@ import com.simon.arranger.activity.MainActivity;
 import com.simon.arranger.R;
 import com.simon.arranger.enums.Repeat;
 import com.simon.arranger.listview_adapters.TaskAdapter;
+import com.simon.arranger.objects.NotificationPublisher;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
 
@@ -137,11 +141,22 @@ public class TodayFragment extends Fragment {
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
 
-            createNotification();
+            scheduleNotification(getNotification("testar lite"), 10000);
         }
     }
 
-    private void createNotification() {
+    private void scheduleNotification(Notification notification, int delay) {
+        Intent notificationIntent = new Intent(activity, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(activity, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager) activity.getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    private Notification getNotification(String content) {
         // Create and explicit intent for an Activity in app
         Intent intent = new Intent(activity, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -156,10 +171,6 @@ public class TodayFragment extends Fragment {
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
-
-        //Send the notification
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(activity);
-
-        notificationManagerCompat.notify(2, builder.build());
+        return builder.build();
     }
 }

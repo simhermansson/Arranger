@@ -8,7 +8,7 @@
     <string name="anytime">Anytime</string>
     <string name="scripts">Scripts</string>
     <string name="templates">Templates</string>
-    <string name="task_hint">E.g. \"Laundry at 6pm every monday\"</string>
+    <string name="task_hint">e.g. \"Laundry at 6pm every monday\"</string>
     <string name="channel_name">ALARM_SERVICE</string>
     <string name="channel_description">ALARM_SERVICE</string>
 </resources>
