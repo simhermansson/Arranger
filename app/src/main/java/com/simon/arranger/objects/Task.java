@@ -28,6 +28,10 @@ public class Task {
         return "Anytime";
     }
 
+    public Date getDate() {
+        return date;
+    }
+
     private void parseInput(String input) {
         try {
             //Regex for time

@@ -31,6 +31,9 @@ import com.simon.arranger.listview_adapters.TaskAdapter;
 import com.simon.arranger.objects.NotificationPublisher;
 import com.simon.arranger.objects.Task;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -141,11 +144,18 @@ public class TodayFragment extends Fragment {
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
 
-            scheduleNotification(getNotification("testar lite"), 10000);
+            Calendar todayCalendar = GregorianCalendar.getInstance();
+            Calendar taskCalendar = GregorianCalendar.getInstance();
+            taskCalendar.set(Calendar.HOUR, task.getDate().getHours());
+            taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
+            taskCalendar.set(Calendar.SECOND, 0);
+            long delay = taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
+
+            scheduleNotification(getNotification(task), delay);
         }
     }
 
-    private void scheduleNotification(Notification notification, int delay) {
+    private void scheduleNotification(Notification notification, long delay) {
         Intent notificationIntent = new Intent(activity, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
@@ -156,7 +166,7 @@ public class TodayFragment extends Fragment {
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
-    private Notification getNotification(String content) {
+    private Notification getNotification(Task task) {
         // Create and explicit intent for an Activity in app
         Intent intent = new Intent(activity, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -165,12 +175,13 @@ public class TodayFragment extends Fragment {
         //Creating a notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, ALARM_SERVICE)
                 .setSmallIcon(R.drawable.ic_remove_grey_24dp)
-                .setContentTitle("textTitle")
-                .setContentText("textContent")
+                .setContentTitle(task.getName())
+                .setContentText(task.getTime())
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
+
         return builder.build();
     }
 }
