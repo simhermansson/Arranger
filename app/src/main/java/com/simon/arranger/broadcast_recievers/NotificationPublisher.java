@@ -1,4 +1,4 @@
-package com.simon.arranger.objects;
+package com.simon.arranger.broadcast_recievers;
 
 import android.app.Notification;
 import android.app.NotificationManager;

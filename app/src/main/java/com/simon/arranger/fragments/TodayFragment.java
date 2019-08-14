@@ -3,17 +3,16 @@ package com.simon.arranger.fragments;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,11 +27,11 @@ import com.simon.arranger.activity.MainActivity;
 import com.simon.arranger.R;
 import com.simon.arranger.enums.Repeat;
 import com.simon.arranger.listview_adapters.TaskAdapter;
-import com.simon.arranger.objects.NotificationPublisher;
+import com.simon.arranger.broadcast_recievers.NotificationPublisher;
 import com.simon.arranger.objects.Task;
+
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import static android.content.Context.ALARM_SERVICE;
@@ -54,8 +53,46 @@ public class TodayFragment extends Fragment {
         //Set title of toolbar
         activity.setTitle("Today");
 
-        //Read tasks from memory and assign them to taskList
+        //Read tasks from storage and assign them to taskList
         taskList = activity.readFromInternalStorage(Repeat.TODAY.toString() + ".json");
+
+        //Add scheduled tasks to that taskList if not already done so today
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); //Get current day
+        String day = Repeat.values()[dayOfWeek].toString();
+        SharedPreferences sb = activity.getSharedPreferences("imported_tasks", 0); // 0 Default Private
+        if (!sb.getBoolean(day, false)) {
+            String previousDay;
+            if (dayOfWeek == 2) {
+                previousDay = Repeat.values()[8].toString();
+            } else {
+                previousDay = Repeat.values()[dayOfWeek-1].toString();
+            }
+
+            //Daily tasks
+            for (Task task :activity.readFromInternalStorage(Repeat.DAILY.toString() + ".json")) {
+                taskList.add(task);
+                if (task.hasDate()) {
+                    scheduleNotification(getNotification(task), getNotificationDelay(task));
+                }
+            }
+
+            //Scheduled tasks
+            for (Task task : activity.readFromInternalStorage(day + ".json")) {
+                taskList.add(task);
+                if (task.hasDate()) {
+                    scheduleNotification(getNotification(task), getNotificationDelay(task));
+                }
+            }
+
+            //Write new tasks for today to storage
+            activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
+
+            //Edit
+            SharedPreferences.Editor editor = sb.edit();
+            editor.putBoolean(day, true);
+            editor.putBoolean(previousDay, false);
+            editor.commit();
+        }
 
         //Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
@@ -118,18 +155,22 @@ public class TodayFragment extends Fragment {
                 if (taskInput.length() > 0) {
                     //Create and add task to taskList and tell taskAdapter to update
                     Task task = new Task(taskInput);
-                    //TODO Maybe move this down after notifyDataSetChanged if too slow
-                    scheduleTask(task);
+                    int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
                     if (Repeat.TODAY.equals(task.getRepeats())) {
+                        taskList.add(task);
+                    } else if (task.getRepeats().equals(Repeat.values()[dayOfWeek])) {
                         taskList.add(task);
                     }
                     taskAdapter.notifyDataSetChanged();
+                    scheduleTask(task);
+                    if (task.hasDate()) {
+                        scheduleNotification(getNotification(task), getNotificationDelay(task));
+                    }
 
                     //Save new task to internal storage and cancel dialog
                     activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
                     inputDialog.cancel();
                 } else {
-                    //TODO Dialog closes on emulator but not on phone, check on more emulators
                     inputDialogEditTaskName.requestFocus();
                     inputDialogEditTaskName.setError("This field cannot be blank");
                 }
@@ -143,15 +184,6 @@ public class TodayFragment extends Fragment {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
-
-            Calendar todayCalendar = GregorianCalendar.getInstance();
-            Calendar taskCalendar = GregorianCalendar.getInstance();
-            taskCalendar.set(Calendar.HOUR, task.getDate().getHours());
-            taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
-            taskCalendar.set(Calendar.SECOND, 0);
-            long delay = taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
-
-            scheduleNotification(getNotification(task), delay);
         }
     }
 
@@ -164,6 +196,16 @@ public class TodayFragment extends Fragment {
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
         AlarmManager alarmManager = (AlarmManager) activity.getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    private long getNotificationDelay(Task task) {
+        // Get delay in milliseconds
+        Calendar todayCalendar = GregorianCalendar.getInstance();
+        Calendar taskCalendar = GregorianCalendar.getInstance();
+        taskCalendar.set(Calendar.HOUR, task.getDate().getHours());
+        taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
+        taskCalendar.set(Calendar.SECOND, 0);
+        return taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
     }
 
     private Notification getNotification(Task task) {

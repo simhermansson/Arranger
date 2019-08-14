@@ -12,8 +12,10 @@ public class Task {
     private String name;
     private Date date;
     private Repeat repeats;
+    private boolean hasDate;
 
     public Task(String input) {
+        hasDate = false;
         parseInput(input);
     }
 
@@ -30,6 +32,10 @@ public class Task {
 
     public Date getDate() {
         return date;
+    }
+
+    public boolean hasDate() {
+        return hasDate;
     }
 
     private void parseInput(String input) {
@@ -71,21 +77,20 @@ public class Task {
             if (time != null) {
 
                 if (hour != null) {
+
                     if (minute != null) {
                         time = hour + ":" + minute;
                     } else {
                         time = hour + ":00";
                     }
-                } else {
-                    date = null;
-                }
 
-                if (twelveHourTime != null) {
-                    date = new SimpleDateFormat("hh:mm aa").parse(time + " " + twelveHourTime);
-                } else {
-                    date = new SimpleDateFormat("hh:mm").parse(time);
+                    if (twelveHourTime != null) {
+                        date = new SimpleDateFormat("hh:mm aa").parse(time + " " + twelveHourTime);
+                    } else {
+                        date = new SimpleDateFormat("hh:mm").parse(time);
+                    }
+                    hasDate = true;
                 }
-
             }
 
             //Parse repetitions
