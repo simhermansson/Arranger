@@ -1,4 +1,4 @@
-package com.simon.arranger.fragments;
+package com.arrangerapp.arranger.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -8,11 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import com.simon.arranger.activity.MainActivity;
-import com.simon.arranger.R;
-import com.simon.arranger.enums.Repeat;
-import com.simon.arranger.listview_adapters.WeekTaskExpandableAdapter;
-import com.simon.arranger.objects.Task;
+import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.listview_adapters.WeekTaskExpandableAdapter;
+import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;

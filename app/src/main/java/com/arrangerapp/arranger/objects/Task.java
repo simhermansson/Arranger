@@ -1,11 +1,9 @@
-package com.simon.arranger.objects;
+package com.arrangerapp.arranger.objects;
 
-import com.simon.arranger.enums.Repeat;
+import com.arrangerapp.arranger.enums.Repeat;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

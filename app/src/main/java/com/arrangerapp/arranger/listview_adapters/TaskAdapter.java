@@ -1,4 +1,4 @@
-package com.simon.arranger.listview_adapters;
+package com.arrangerapp.arranger.listview_adapters;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageButton;
@@ -8,10 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import com.simon.arranger.activity.MainActivity;
-import com.simon.arranger.R;
-import com.simon.arranger.enums.Repeat;
-import com.simon.arranger.objects.Task;
+import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 

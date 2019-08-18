@@ -1,4 +1,4 @@
-package com.simon.arranger.activity;
+package com.arrangerapp.arranger.activity;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.simon.arranger.R;
-import com.simon.arranger.fragments.TodayFragment;
-import com.simon.arranger.fragments.WeekFragment;
-import com.simon.arranger.objects.Task;
+import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.fragments.TodayFragment;
+import com.arrangerapp.arranger.fragments.WeekFragment;
+import com.arrangerapp.arranger.objects.Task;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

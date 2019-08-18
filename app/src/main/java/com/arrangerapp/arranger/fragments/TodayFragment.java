@@ -1,4 +1,4 @@
-package com.simon.arranger.fragments;
+package com.arrangerapp.arranger.fragments;
 
 import android.app.AlarmManager;
 import android.app.Dialog;
@@ -23,12 +23,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.simon.arranger.activity.MainActivity;
-import com.simon.arranger.R;
-import com.simon.arranger.enums.Repeat;
-import com.simon.arranger.listview_adapters.TaskAdapter;
-import com.simon.arranger.broadcast_recievers.NotificationPublisher;
-import com.simon.arranger.objects.Task;
+import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
+import com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher;
+import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.Calendar;
