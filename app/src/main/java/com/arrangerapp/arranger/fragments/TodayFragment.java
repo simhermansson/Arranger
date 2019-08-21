@@ -1,22 +1,11 @@
 package com.arrangerapp.arranger.fragments;
 
-import android.app.AlarmManager;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
-import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,19 +18,15 @@ import android.widget.ListView;
 
 import com.arrangerapp.arranger.activity.MainActivity;
 import com.arrangerapp.arranger.R;
-import com.arrangerapp.arranger.broadcast_recievers.JobReciever;
 import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
-import com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 
-import static android.content.Context.ALARM_SERVICE;
 
 public class TodayFragment extends Fragment {
     private MainActivity activity;
@@ -115,6 +100,7 @@ public class TodayFragment extends Fragment {
 
         //Handle dialog inputs
         final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputTaskName);
+        inputDialogEditTaskName.requestFocus();
         //TODO create listener for highlighting input text
         AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
         inputDialogImageButton.setOnClickListener(new View.OnClickListener() {

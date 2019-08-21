@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.SystemClock;
@@ -202,20 +203,14 @@ public class MainActivity extends AppCompatActivity {
             inputStream.close();
             jsonString = stringBuilder.toString();
 
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
+            //Convert saved JsonArray of tasks into a list of tasks and return it
+            Type listType = new TypeToken<List<Task>>(){}.getType();
+            ArrayList<Task> storageList = gson.fromJson(jsonString, listType);
+            return storageList;
 
-        //Convert saved JsonArray of tasks into a list of tasks and return it
-        Type listType = new TypeToken<List<Task>>(){}.getType();
-        ArrayList<Task> arrayList = new ArrayList<>();
-        ArrayList<Task> storageList = gson.fromJson(jsonString, listType);
-        if (storageList != null) {
-            arrayList = storageList;
+        } catch (IOException e) {
+            return new ArrayList<Task>();
         }
-        return arrayList;
     }
 
     public ArrayList<Task> getAndScheduleTasks() {
@@ -301,6 +296,8 @@ public class MainActivity extends AppCompatActivity {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.DEFAULT_ALL)
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setVibrate(new long[] {1000, 1000, 1000})
+                .setLights(Color.GREEN, 1000, 500)
                 .setContentIntent(pendingIntent);
 
         return builder.build();

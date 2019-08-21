@@ -24,7 +24,7 @@
             android:layout_marginBottom="4dp"
             android:ems="10"
             android:hint="@string/task_hint"
-            android:inputType="textShortMessage"
+            android:inputType="textShortMessage|textCapSentences"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/inputImageButton"
             app:layout_constraintStart_toStartOf="parent"
