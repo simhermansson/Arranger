@@ -1,11 +1,21 @@
 package com.arrangerapp.arranger.activity;
 
+import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +24,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import com.arrangerapp.arranger.broadcast_recievers.JobReciever;
+import com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher;
+import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.objects.TaskComparator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.arrangerapp.arranger.R;
@@ -30,6 +45,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -112,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        //Update notifications at midnight
+        createAlarm();
     }
 
     private void createNotificationChannel() {
@@ -169,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             StringBuilder stringBuilder = new StringBuilder();
 
             //Check if inputStream is null
-            //else make InputStreamReader to make BufferedReader and crate empty string
+            //else make InputStreamReader to make BufferedReader and create empty string
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String recieveString = "";
@@ -197,5 +216,121 @@ public class MainActivity extends AppCompatActivity {
             arrayList = storageList;
         }
         return arrayList;
+    }
+
+    public ArrayList<Task> getAndScheduleTasks() {
+        //Read tasks from storage and assign them to taskList
+        ArrayList<Task> taskList = readFromInternalStorage(Repeat.TODAY.toString() + ".json");
+
+        //Add scheduled tasks to that taskList if not already done so today
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); //Get current day
+        String day = Repeat.values()[dayOfWeek].toString();
+        SharedPreferences sb = getSharedPreferences("imported_tasks", 0); // 0 Default Private
+        if (!sb.getBoolean(day, false)) {
+            String previousDay;
+            if (dayOfWeek == 2) {
+                previousDay = Repeat.values()[8].toString();
+            } else {
+                previousDay = Repeat.values()[dayOfWeek - 1].toString();
+            }
+
+            //Daily tasks
+            for (Task task : readFromInternalStorage(Repeat.DAILY.toString() + ".json")) {
+                taskList.add(task);
+                if (task.hasDate()) {
+                    scheduleNotification(task);
+                }
+            }
+
+            //Scheduled tasks
+            for (Task task : readFromInternalStorage(day + ".json")) {
+                taskList.add(task);
+                if (task.hasDate()) {
+                    scheduleNotification(task);
+                }
+            }
+
+            //Write new tasks for today to storage
+            Collections.sort(taskList, new TaskComparator());
+            writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
+
+            //Edit
+            SharedPreferences.Editor editor = sb.edit();
+            editor.putBoolean(day, true);
+            editor.putBoolean(previousDay, false);
+            editor.commit();
+        }
+
+        return taskList;
+    }
+
+    public void scheduleNotification(Task task) {
+        Notification notification = getNotification(task);
+        long delay = getNotificationDelay(task);
+
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, NotificationPublisher.NOTIFICATION_INT_ID);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, NotificationPublisher.NOTIFICATION_INT_ID, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    public long getNotificationDelay(Task task) {
+        // Get delay in milliseconds
+        Calendar todayCalendar = Calendar.getInstance();
+        Calendar taskCalendar = Calendar.getInstance();
+        taskCalendar.set(Calendar.HOUR_OF_DAY, task.getDate().getHours());
+        taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
+        taskCalendar.set(Calendar.SECOND, 0);
+        return taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
+    }
+
+    public Notification getNotification(Task task) {
+        // Create and explicit intent for an Activity in app
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationPublisher.NOTIFICATION_INT_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        //Creating a notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ALARM_SERVICE)
+                .setSmallIcon(R.drawable.ic_notifications_grey_24dp)
+                .setContentTitle(task.getName())
+                .setContentText(task.getTime())
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.DEFAULT_ALL)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setContentIntent(pendingIntent);
+
+        return builder.build();
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            getAndScheduleTasks();
+            createAlarm();
+        }
+    };
+
+    public void createAlarm() {
+        //System request code
+        int DATA_FETCHER_RC = 123;
+        //Create Alarm Manager
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        //Create time of day of alarm
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+
+        //Create an intent that points to the reciever.
+        //The system will notify the app about the current time, and send a broadcast to the app
+        Intent intent = new Intent(this, JobReciever.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, DATA_FETCHER_RC, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //Set alarm
+        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 }

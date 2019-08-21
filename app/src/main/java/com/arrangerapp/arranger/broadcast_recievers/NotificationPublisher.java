@@ -10,6 +10,7 @@ public class NotificationPublisher extends BroadcastReceiver {
 
     public static String NOTIFICATION_ID = "notificationId";
     public static String NOTIFICATION = "notification";
+    public static int NOTIFICATION_INT_ID = 2;
 
     @Override
     public void onReceive(Context context, Intent intent) {

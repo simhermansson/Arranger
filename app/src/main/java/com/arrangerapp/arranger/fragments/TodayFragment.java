@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
@@ -25,13 +29,17 @@ import android.widget.ListView;
 
 import com.arrangerapp.arranger.activity.MainActivity;
 import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.broadcast_recievers.JobReciever;
 import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
 import com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher;
 import com.arrangerapp.arranger.objects.Task;
+import com.arrangerapp.arranger.objects.TaskComparator;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -53,45 +61,7 @@ public class TodayFragment extends Fragment {
         activity.setTitle("Today");
 
         //Read tasks from storage and assign them to taskList
-        taskList = activity.readFromInternalStorage(Repeat.TODAY.toString() + ".json");
-
-        //Add scheduled tasks to that taskList if not already done so today
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); //Get current day
-        String day = Repeat.values()[dayOfWeek].toString();
-        SharedPreferences sb = activity.getSharedPreferences("imported_tasks", 0); // 0 Default Private
-        if (!sb.getBoolean(day, false)) {
-            String previousDay;
-            if (dayOfWeek == 2) {
-                previousDay = Repeat.values()[8].toString();
-            } else {
-                previousDay = Repeat.values()[dayOfWeek-1].toString();
-            }
-
-            //Daily tasks
-            for (Task task :activity.readFromInternalStorage(Repeat.DAILY.toString() + ".json")) {
-                taskList.add(task);
-                if (task.hasDate()) {
-                    scheduleNotification(getNotification(task), getNotificationDelay(task));
-                }
-            }
-
-            //Scheduled tasks
-            for (Task task : activity.readFromInternalStorage(day + ".json")) {
-                taskList.add(task);
-                if (task.hasDate()) {
-                    scheduleNotification(getNotification(task), getNotificationDelay(task));
-                }
-            }
-
-            //Write new tasks for today to storage
-            activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
-
-            //Edit
-            SharedPreferences.Editor editor = sb.edit();
-            editor.putBoolean(day, true);
-            editor.putBoolean(previousDay, false);
-            editor.commit();
-        }
+        taskList = activity.getAndScheduleTasks();
 
         //Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
@@ -162,10 +132,11 @@ public class TodayFragment extends Fragment {
                             task.getRepeats().equals(Repeat.DAILY)) {
                         taskList.add(task);
                     }
+                    Collections.sort(taskList, new TaskComparator());
                     taskAdapter.notifyDataSetChanged();
                     scheduleTask(task);
                     if (task.hasDate()) {
-                        scheduleNotification(getNotification(task), getNotificationDelay(task));
+                        activity.scheduleNotification(task);
                     }
 
                     //Save new task to internal storage and cancel dialog
@@ -186,45 +157,5 @@ public class TodayFragment extends Fragment {
             tasks.add(task);
             activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
         }
-    }
-
-    private void scheduleNotification(Notification notification, long delay) {
-        Intent notificationIntent = new Intent(activity, NotificationPublisher.class);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(activity, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        AlarmManager alarmManager = (AlarmManager) activity.getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
-    }
-
-    private long getNotificationDelay(Task task) {
-        // Get delay in milliseconds
-        Calendar todayCalendar = Calendar.getInstance();
-        Calendar taskCalendar = Calendar.getInstance();
-        taskCalendar.set(Calendar.HOUR_OF_DAY, task.getDate().getHours());
-        taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
-        taskCalendar.set(Calendar.SECOND, 0);
-        return taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
-    }
-
-    private Notification getNotification(Task task) {
-        // Create and explicit intent for an Activity in app
-        Intent intent = new Intent(activity, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
-
-        //Creating a notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(activity, ALARM_SERVICE)
-                .setSmallIcon(R.drawable.ic_notifications_grey_24dp)
-                .setContentTitle(task.getName())
-                .setContentText(task.getTime())
-                .setPriority(NotificationCompat.DEFAULT_ALL)
-                // Set the intent that will fire when the user taps the notification
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        return builder.build();
     }
 }

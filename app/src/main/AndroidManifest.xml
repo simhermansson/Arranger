@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <receiver android:name="com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher" />
+        <receiver android:name="com.arrangerapp.arranger.broadcast_recievers.JobReciever" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
