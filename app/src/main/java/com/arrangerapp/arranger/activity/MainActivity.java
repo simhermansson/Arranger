@@ -261,32 +261,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void scheduleNotification(Task task) {
         Notification notification = getNotification(task);
-        long delay = getNotificationDelay(task);
+        long taskTimeInMillis = getNotificationDelay(task);
 
         Intent notificationIntent = new Intent(this, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, NotificationPublisher.NOTIFICATION_INT_ID);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, NotificationPublisher.NOTIFICATION_INT_ID, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, task.getId(), notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, taskTimeInMillis, pendingIntent);
     }
 
     public long getNotificationDelay(Task task) {
         // Get delay in milliseconds
-        Calendar todayCalendar = Calendar.getInstance();
         Calendar taskCalendar = Calendar.getInstance();
         taskCalendar.set(Calendar.HOUR_OF_DAY, task.getDate().getHours());
         taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
         taskCalendar.set(Calendar.SECOND, 0);
-        return taskCalendar.getTimeInMillis() - todayCalendar.getTimeInMillis();
+        return taskCalendar.getTimeInMillis();
     }
 
     public Notification getNotification(Task task) {
         // Create and explicit intent for an Activity in app
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationPublisher.NOTIFICATION_INT_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationPublisher.NOTIFICATION_INT_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //Creating a notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ALARM_SERVICE)
@@ -301,6 +299,14 @@ public class MainActivity extends AppCompatActivity {
                 .setContentIntent(pendingIntent);
 
         return builder.build();
+    }
+
+    public void cancelScheduledNotification(int id) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, notificationIntent, 0);
+        alarmManager.cancel(pendingIntent);
+        pendingIntent.cancel();
     }
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -328,6 +334,6 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, DATA_FETCHER_RC, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //Set alarm
-        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 }

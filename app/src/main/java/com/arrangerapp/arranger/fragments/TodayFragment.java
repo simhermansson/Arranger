@@ -1,6 +1,7 @@
 package com.arrangerapp.arranger.fragments;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -114,16 +115,19 @@ public class TodayFragment extends Fragment {
                     int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
                     if (Repeat.TODAY.equals(task.getRepeats())) {
                         taskList.add(task);
+                        if (task.hasDate()) {
+                            activity.scheduleNotification(task);
+                        }
                     } else if (task.getRepeats().equals(Repeat.values()[dayOfWeek]) ||
                             task.getRepeats().equals(Repeat.DAILY)) {
                         taskList.add(task);
+                        if (task.hasDate()) {
+                            activity.scheduleNotification(task);
+                        }
                     }
                     Collections.sort(taskList, new TaskComparator());
                     taskAdapter.notifyDataSetChanged();
-                    scheduleTask(task);
-                    if (task.hasDate()) {
-                        activity.scheduleNotification(task);
-                    }
+                    saveTaskToStorage(task);
 
                     //Save new task to internal storage and cancel dialog
                     activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
@@ -136,7 +140,7 @@ public class TodayFragment extends Fragment {
         });
     }
 
-    private void scheduleTask(Task task) {
+    private void saveTaskToStorage(Task task) {
         Repeat repeat = task.getRepeats();
         if (!Repeat.TODAY.equals(repeat)) {
             ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");

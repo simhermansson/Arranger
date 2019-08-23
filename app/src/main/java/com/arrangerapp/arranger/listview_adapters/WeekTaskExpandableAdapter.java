@@ -1,5 +1,6 @@
 package com.arrangerapp.arranger.listview_adapters;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.HapticFeedbackConstants;
@@ -15,6 +16,8 @@ import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static android.content.Context.ALARM_SERVICE;
 
 public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
     private Context context;
@@ -73,6 +76,9 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
                     //Remove task from taskList, notify the adapter and write new list to storage
                     expandableTaskList.get(expandableTitleList.get(groupPosition)).remove(task);
                     notifyDataSetChanged();
+                    if (task.hasDate()) {
+                        mainActivity.cancelScheduledNotification(task.getId());
+                    }
                     mainActivity.writeToInternalStorage(expandableTitleList.get(groupPosition) + ".json",
                             expandableTaskList.get(expandableTitleList.get(groupPosition)));
 

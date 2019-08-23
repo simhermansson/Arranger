@@ -1,5 +1,6 @@
 package com.arrangerapp.arranger.listview_adapters;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.HapticFeedbackConstants;
@@ -14,6 +15,8 @@ import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
+
+import static android.content.Context.ALARM_SERVICE;
 
 public class TaskAdapter extends ArrayAdapter<Task> {
     private Context context;
@@ -70,6 +73,9 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                     //Remove task from taskList, notify the adapter and write new list to storage
                     tasks.remove(task);
                     notifyDataSetChanged();
+                    if (task.hasDate()) {
+                        mainActivity.cancelScheduledNotification(task.getId());
+                    }
                     mainActivity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", tasks);
 
                     //Haptic feedback on press
