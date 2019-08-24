@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
@@ -131,7 +132,14 @@ public class MainActivity extends AppCompatActivity {
         );
 
         //Update notifications at midnight
+        registerReceiver(broadcastReceiver, new IntentFilter("SCHEDULE_NOTIFICATIONS"));
         createAlarm();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 
     private void createNotificationChannel() {
