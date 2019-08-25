@@ -1,13 +1,16 @@
 package com.arrangerapp.arranger.fragments;
 
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatImageButton;
+
+import com.arrangerapp.arranger.tools.DailyTaskReschedule;
+import com.arrangerapp.arranger.tools.NotificationSchedule;
+import com.arrangerapp.arranger.tools.StorageReaderWriter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +20,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.enums.Repeat;
-import com.arrangerapp.arranger.enums.WeekDays;
 import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
@@ -34,6 +36,9 @@ public class TodayFragment extends Fragment {
     private MainActivity activity;
     private ArrayList<Task> taskList;
     private TaskAdapter taskAdapter;
+    private StorageReaderWriter storageReaderWriter;
+    private NotificationSchedule notificationSchedule;
+    private DailyTaskReschedule dailyTaskReschedule;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,7 @@ public class TodayFragment extends Fragment {
         activity.setTitle("Today");
 
         //Read tasks from storage and assign them to taskList
-        taskList = activity.getAndScheduleTasks();
+        taskList = dailyTaskReschedule.getAndScheduleTasks();
 
         //Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
@@ -73,6 +78,9 @@ public class TodayFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (MainActivity) context;
+        storageReaderWriter = new StorageReaderWriter(activity);
+        notificationSchedule = new NotificationSchedule(activity);
+        dailyTaskReschedule = new DailyTaskReschedule(activity);
     }
 
     private void openInputDialog(final FloatingActionButton floatingActionButton) {
@@ -117,14 +125,14 @@ public class TodayFragment extends Fragment {
                     if (Repeat.TODAY.equals(task.getRepeats())) {
                         taskList.add(task);
                         if (task.hasDate()) {
-                            activity.scheduleNotification(task);
+                            notificationSchedule.scheduleNotification(task);
                         }
                     } else if (((dayOfWeek != 1 && task.getRepeats().equals(Repeat.values()[dayOfWeek])) ||
                             (dayOfWeek == 1 && task.getRepeats().equals(Repeat.SUNDAY))) ||
                             task.getRepeats().equals(Repeat.DAILY)) {
                         taskList.add(task);
                         if (task.hasDate()) {
-                            activity.scheduleNotification(task);
+                            notificationSchedule.scheduleNotification(task);
                         }
                     }
                     Collections.sort(taskList, new TaskComparator());
@@ -132,7 +140,7 @@ public class TodayFragment extends Fragment {
                     saveTaskToStorage(task);
 
                     //Save new task to internal storage and cancel dialog
-                    activity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", taskList);
+                    storageReaderWriter.write(Repeat.TODAY.toString() + ".json", taskList);
                     inputDialog.cancel();
                 } else {
                     inputDialogEditTaskName.requestFocus();
@@ -145,9 +153,9 @@ public class TodayFragment extends Fragment {
     private void saveTaskToStorage(Task task) {
         Repeat repeat = task.getRepeats();
         if (!Repeat.TODAY.equals(repeat)) {
-            ArrayList<Task> tasks = activity.readFromInternalStorage(repeat.toString() + ".json");
+            ArrayList<Task> tasks = new StorageReaderWriter(activity).read(repeat.toString() + ".json");
             tasks.add(task);
-            activity.writeToInternalStorage(repeat.toString() + ".json", tasks);
+            new StorageReaderWriter(activity).write(repeat.toString() + ".json", tasks);
         }
     }
 }

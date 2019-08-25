@@ -1,33 +1,37 @@
 package com.arrangerapp.arranger.listview_adapters;
 
-import android.app.AlarmManager;
 import android.content.Context;
-import android.support.v7.widget.AppCompatImageButton;
+import androidx.appcompat.widget.AppCompatImageButton;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import com.arrangerapp.arranger.activity.MainActivity;
+
+import com.arrangerapp.arranger.tools.NotificationSchedule;
+import com.arrangerapp.arranger.tools.StorageReaderWriter;
+import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 
-import static android.content.Context.ALARM_SERVICE;
-
 public class TaskAdapter extends ArrayAdapter<Task> {
     private Context context;
     private ArrayList<Task> tasks;
     private MainActivity mainActivity;
+    private StorageReaderWriter storageReaderWriter;
+    private NotificationSchedule notificationSchedule;
 
     public TaskAdapter(ArrayList<Task> tasks, Context context) {
         super(context, R.layout.task_view, tasks);
         this.context = context;
         this.tasks = tasks;
         mainActivity = (MainActivity) context;
+        storageReaderWriter = new StorageReaderWriter(mainActivity);
+        notificationSchedule = new NotificationSchedule(mainActivity);
     }
 
     @Override
@@ -74,9 +78,9 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                     tasks.remove(task);
                     notifyDataSetChanged();
                     if (task.hasDate()) {
-                        mainActivity.cancelScheduledNotification(task.getId());
+                        notificationSchedule.cancelScheduledNotification(task.getId());
                     }
-                    mainActivity.writeToInternalStorage(Repeat.TODAY.toString() + ".json", tasks);
+                    storageReaderWriter.write(Repeat.TODAY.toString() + ".json", tasks);
 
                     //Haptic feedback on press
                     v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);

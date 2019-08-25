@@ -1,8 +1,7 @@
 package com.arrangerapp.arranger.listview_adapters;
 
-import android.app.AlarmManager;
 import android.content.Context;
-import android.support.v7.widget.AppCompatImageButton;
+import androidx.appcompat.widget.AppCompatImageButton;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,25 +10,29 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.arrangerapp.arranger.R;
-import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.tools.NotificationSchedule;
+import com.arrangerapp.arranger.tools.StorageReaderWriter;
+import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.objects.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static android.content.Context.ALARM_SERVICE;
 
 public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
     private Context context;
     private HashMap<String, ArrayList<Task>> expandableTaskList;
     private ArrayList<String> expandableTitleList;
     private MainActivity mainActivity;
+    private StorageReaderWriter storageReaderWriter;
+    private NotificationSchedule notificationSchedule;
 
     public WeekTaskExpandableAdapter(HashMap<String, ArrayList<Task>> expandableTaskList, ArrayList<String> expandableTitleList, Context context) {
         this.context = context;
         this.expandableTaskList = expandableTaskList;
         this.expandableTitleList = expandableTitleList;
         mainActivity = (MainActivity) context;
+        storageReaderWriter = new StorageReaderWriter(mainActivity);
+        notificationSchedule = new NotificationSchedule(mainActivity);
     }
 
     @Override
@@ -77,9 +80,9 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
                     expandableTaskList.get(expandableTitleList.get(groupPosition)).remove(task);
                     notifyDataSetChanged();
                     if (task.hasDate()) {
-                        mainActivity.cancelScheduledNotification(task.getId());
+                        notificationSchedule.cancelScheduledNotification(task.getId());
                     }
-                    mainActivity.writeToInternalStorage(expandableTitleList.get(groupPosition) + ".json",
+                    storageReaderWriter.write(expandableTitleList.get(groupPosition) + ".json",
                             expandableTaskList.get(expandableTitleList.get(groupPosition)));
 
                     //Haptic feedback on press

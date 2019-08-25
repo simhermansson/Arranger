@@ -2,13 +2,15 @@ package com.arrangerapp.arranger.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import com.arrangerapp.arranger.activity.MainActivity;
+import com.arrangerapp.arranger.tools.NotificationSchedule;
+import com.arrangerapp.arranger.tools.StorageReaderWriter;
+import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.listview_adapters.WeekTaskExpandableAdapter;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 public class WeekFragment extends Fragment {
     private MainActivity activity;
     private WeekTaskExpandableAdapter weekTaskExpandableAdapter;
+    private StorageReaderWriter storageReaderWriter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,15 +37,15 @@ public class WeekFragment extends Fragment {
         activity.setTitle("Week");
 
         //Read tasks from storage and assign them to the correct lists
-        ArrayList<Task> todayList = activity.readFromInternalStorage(Repeat.TODAY.toString() + ".json");
-        ArrayList<Task> everyDayList = activity.readFromInternalStorage(Repeat.DAILY.toString() + ".json");
-        ArrayList<Task> mondayList = activity.readFromInternalStorage(Repeat.MONDAY.toString() + ".json");
-        ArrayList<Task> tuesdayList = activity.readFromInternalStorage(Repeat.TUESDAY.toString() + ".json");
-        ArrayList<Task> wednesdayList = activity.readFromInternalStorage(Repeat.WEDNESDAY.toString() + ".json");
-        ArrayList<Task> thursdayList = activity.readFromInternalStorage(Repeat.THURSDAY.toString() + ".json");
-        ArrayList<Task> fridayList = activity.readFromInternalStorage(Repeat.FRIDAY.toString() + ".json");
-        ArrayList<Task> saturdayList = activity.readFromInternalStorage(Repeat.SATURDAY.toString() + ".json");
-        ArrayList<Task> sundayList = activity.readFromInternalStorage(Repeat.SUNDAY.toString() + ".json");
+        ArrayList<Task> todayList = storageReaderWriter.read(Repeat.TODAY.toString() + ".json");
+        ArrayList<Task> everyDayList = storageReaderWriter.read(Repeat.DAILY.toString() + ".json");
+        ArrayList<Task> mondayList = storageReaderWriter.read(Repeat.MONDAY.toString() + ".json");
+        ArrayList<Task> tuesdayList = storageReaderWriter.read(Repeat.TUESDAY.toString() + ".json");
+        ArrayList<Task> wednesdayList = storageReaderWriter.read(Repeat.WEDNESDAY.toString() + ".json");
+        ArrayList<Task> thursdayList = storageReaderWriter.read(Repeat.THURSDAY.toString() + ".json");
+        ArrayList<Task> fridayList = storageReaderWriter.read(Repeat.FRIDAY.toString() + ".json");
+        ArrayList<Task> saturdayList = storageReaderWriter.read(Repeat.SATURDAY.toString() + ".json");
+        ArrayList<Task> sundayList = storageReaderWriter.read(Repeat.SUNDAY.toString() + ".json");
 
         //Create a HashMap and put in all the lists
         HashMap<String, ArrayList<Task>> expandableTaskList = new HashMap<>();
@@ -84,5 +87,6 @@ public class WeekFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (MainActivity) context;
+        storageReaderWriter = new StorageReaderWriter(activity);
     }
 }
