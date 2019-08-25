@@ -20,6 +20,7 @@ import android.widget.ListView;
 import com.arrangerapp.arranger.activity.MainActivity;
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.enums.WeekDays;
 import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
@@ -118,7 +119,8 @@ public class TodayFragment extends Fragment {
                         if (task.hasDate()) {
                             activity.scheduleNotification(task);
                         }
-                    } else if (task.getRepeats().equals(Repeat.values()[dayOfWeek]) ||
+                    } else if (((dayOfWeek != 1 && task.getRepeats().equals(Repeat.values()[dayOfWeek])) ||
+                            (dayOfWeek == 1 && task.getRepeats().equals(Repeat.SUNDAY))) ||
                             task.getRepeats().equals(Repeat.DAILY)) {
                         taskList.add(task);
                         if (task.hasDate()) {

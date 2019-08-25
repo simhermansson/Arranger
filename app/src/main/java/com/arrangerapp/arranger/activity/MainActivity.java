@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.arrangerapp.arranger.broadcast_recievers.JobReciever;
 import com.arrangerapp.arranger.broadcast_recievers.NotificationPublisher;
 import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.enums.WeekDays;
 import com.arrangerapp.arranger.objects.TaskComparator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        getAndScheduleTasks();
         //Update notifications at midnight
         registerReceiver(broadcastReceiver, new IntentFilter("SCHEDULE_NOTIFICATIONS"));
         createAlarm();
@@ -227,14 +229,15 @@ public class MainActivity extends AppCompatActivity {
 
         //Add scheduled tasks to that taskList if not already done so today
         int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); //Get current day
-        String day = Repeat.values()[dayOfWeek].toString();
+        String day = WeekDays.values()[dayOfWeek-1].toString();
         SharedPreferences sb = getSharedPreferences("imported_tasks", 0); // 0 Default Private
-        if (!sb.getBoolean(day, false)) {
+        //if (!sb.getBoolean(day, false)) {
+        if (true) {
             String previousDay;
-            if (dayOfWeek == 2) {
-                previousDay = Repeat.values()[8].toString();
+            if (dayOfWeek == 1) {
+                previousDay = WeekDays.values()[6].toString();
             } else {
-                previousDay = Repeat.values()[dayOfWeek - 1].toString();
+                previousDay = WeekDays.values()[dayOfWeek-1].toString();
             }
 
             //Daily tasks
@@ -277,7 +280,13 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, task.getId(), notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, taskTimeInMillis, pendingIntent);
+        if (Build.VERSION.SDK_INT >= 23) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, taskTimeInMillis, pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= 19){
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, taskTimeInMillis, pendingIntent);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, taskTimeInMillis, pendingIntent);
+        }
     }
 
     public long getNotificationDelay(Task task) {
@@ -321,27 +330,29 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             getAndScheduleTasks();
-            createAlarm();
         }
     };
 
     public void createAlarm() {
-        //System request code
-        int DATA_FETCHER_RC = 123;
         //Create Alarm Manager
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         //Create time of day of alarm
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
+        //calendar.add(Calendar.DATE, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 13);
+        calendar.set(Calendar.MINUTE, 9);
 
-        //Create an intent that points to the reciever.
+        //Create an intent that points to the receiver.
         //The system will notify the app about the current time, and send a broadcast to the app
-        Intent intent = new Intent(this, JobReciever.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, DATA_FETCHER_RC, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //Set alarm
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        if (Build.VERSION.SDK_INT >= 23) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        } else {
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        }
     }
 }
