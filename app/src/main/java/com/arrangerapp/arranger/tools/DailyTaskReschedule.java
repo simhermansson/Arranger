@@ -11,7 +11,7 @@ import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.enums.WeekDays;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
-import com.arrangerapp.arranger.workers.TaskReschedulerWorker;
+import com.arrangerapp.arranger.workers.TaskRescheduleWorker;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,6 +33,7 @@ public class DailyTaskReschedule {
 
     public void scheduleNextWork() {
         // Create Calendar for time when work should be executed
+        Calendar current = Calendar.getInstance();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -40,8 +41,8 @@ public class DailyTaskReschedule {
         calendar.set(Calendar.SECOND, 0);
 
         // Create a OneTimeWorkRequest object and enqueue it
-        OneTimeWorkRequest enqueueNotification = new OneTimeWorkRequest.Builder(TaskReschedulerWorker.class)
-                .setInitialDelay(calendar.getTimeInMillis(), TimeUnit.MILLISECONDS)
+        OneTimeWorkRequest enqueueNotification = new OneTimeWorkRequest.Builder(TaskRescheduleWorker.class)
+                .setInitialDelay(calendar.getTimeInMillis() - current.getTimeInMillis(), TimeUnit.MILLISECONDS)
                 .build();
 
         // Enqueue the OneTimeWorkRequest
@@ -61,7 +62,7 @@ public class DailyTaskReschedule {
             if (dayOfWeek == 1) {
                 previousDay = WeekDays.values()[6].toString();
             } else {
-                previousDay = WeekDays.values()[dayOfWeek-1].toString();
+                previousDay = WeekDays.values()[dayOfWeek-2].toString();
             }
 
             //Daily tasks

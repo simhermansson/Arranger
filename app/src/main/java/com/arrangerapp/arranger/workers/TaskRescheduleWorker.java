@@ -8,12 +8,12 @@ import androidx.work.WorkerParameters;
 
 import com.arrangerapp.arranger.tools.DailyTaskReschedule;
 
-public class TaskReschedulerWorker extends Worker {
+public class TaskRescheduleWorker extends Worker {
 
     private Context context;
     private WorkerParameters params;
 
-    public TaskReschedulerWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+    public TaskRescheduleWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
         this.context = context;
         this.params = params;

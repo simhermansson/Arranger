@@ -1,12 +1,9 @@
 package com.arrangerapp.arranger.activities;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.os.Build;
-
 import androidx.annotation.NonNull;
 
 import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.tools.DailyTaskReschedule;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.core.view.GravityCompat;
@@ -36,9 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Set initial state
         currentState = State.TODAY;
-
-        //Create notification channel
-        createNotificationChannel();
 
         //Set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -102,26 +96,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        new DailyTaskReschedule(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    private void createNotificationChannel() {
-        //Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(ALARM_SERVICE, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 }

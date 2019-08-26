@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import com.arrangerapp.arranger.tools.NotificationSchedule;
 import com.arrangerapp.arranger.tools.StorageReaderWriter;
 import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.R;
