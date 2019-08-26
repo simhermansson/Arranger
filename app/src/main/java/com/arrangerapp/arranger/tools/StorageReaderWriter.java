@@ -26,26 +26,26 @@ public class StorageReaderWriter {
     }
 
     /**
-     * Given a fileName string, saves an arrayList parameter.
-     * @param fileName
-     * @return
+     * Given a file name string, saves an arrayList.
+     * @param fileName The name of the file or location to save the arrayList.
+     * @param arrayList The arrayList to save
      */
     public void write(String fileName, ArrayList<Task> arrayList) {
-        //Get filepath and use it to create file
+        // Get filepath and use it to create file
         String filePath = context.getFilesDir() + "/" + fileName;
         File file = new File(filePath);
 
-        //Create JsonArray
+        // Create JsonArray
         String jsonArray = new Gson().toJson(arrayList);
 
-        //Create FileOutputStream with jsonFile as part of constructor
+        // Create FileOutputStream with jsonFile as part of constructor
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
 
-            //Convert JSON String to bytes and write() it
+            // Convert JSON String to bytes and write() it
             fileOutputStream.write(jsonArray.getBytes());
 
-            //Flush and close FileOutputStream
+            // Flush and close FileOutputStream
             fileOutputStream.flush();
             fileOutputStream.close();
 
@@ -57,41 +57,40 @@ public class StorageReaderWriter {
     }
 
     /**
-     * Given a fileName string, returns a saved arrayList.
-     * @param fileName
-     * @return
+     * Given a file name string, returns a saved arrayList.
+     * @param fileName The name of the saved arrayList.
+     * @return ArrayList of today's tasks.
      */
     public ArrayList<Task> read(String fileName) {
         Gson gson = new Gson();
         String jsonString = "";
         try {
-            //Get filepath and use it to create file
+            // Get filepath and use it to create file
             String filePath = context.getFilesDir() + "/" + fileName;
             File file = new File(filePath);
 
-            //Make InputStream with file in constructor
+            // Make InputStream with file in constructor
             InputStream inputStream = new FileInputStream(file);
             StringBuilder stringBuilder = new StringBuilder();
 
-            //Check if inputStream is null
-            //else make InputStreamReader to make BufferedReader and create empty string
+            // Check if inputStream is null
+            // else make InputStreamReader to make BufferedReader and create empty string
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String recieveString = "";
 
-            //Use while loop to append the lines from teh BufferedReader
+            // Use while loop to append the lines from teh BufferedReader
             while ((recieveString = bufferedReader.readLine()) != null) {
                 stringBuilder.append(recieveString);
             }
 
-            //Close InputStream and save stringBuilder as string
+            // Close InputStream and save stringBuilder as string
             inputStream.close();
             jsonString = stringBuilder.toString();
 
-            //Convert saved JsonArray of tasks into a list of tasks and return it
+            // Convert saved JsonArray of tasks into a list of tasks and return it
             Type listType = new TypeToken<List<Task>>(){}.getType();
-            ArrayList<Task> storageList = gson.fromJson(jsonString, listType);
-            return storageList;
+            return gson.fromJson(jsonString, listType);
 
         } catch (IOException e) {
             return new ArrayList<Task>();

@@ -55,10 +55,10 @@ public class NotificationWorker extends Worker {
 
     /**
      * Given strings of name and time and int of id, a notification is created and returned.
-     * @param name
-     * @param time
-     * @param id
-     * @return Notification
+     * @param name Task name.
+     * @param time Task time.
+     * @param id Task unique id.
+     * @return Notification object for that task.
      */
     private Notification getNotification(String name, String time, int id) {
         // Create and explicit intent for an Activity in app
@@ -80,6 +80,9 @@ public class NotificationWorker extends Worker {
         return builder.build();
     }
 
+    /**
+     * Creates a notification channel if Android version is Oreo or higher.
+     */
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library

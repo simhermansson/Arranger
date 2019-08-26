@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 
 public class TaskComparator implements Comparator<Task> {
+
     @Override
     public int compare(Task o1, Task o2) {
         if (o1.getDate() != null && o2.getDate() != null) {

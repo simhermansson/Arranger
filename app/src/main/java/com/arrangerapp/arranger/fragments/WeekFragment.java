@@ -32,10 +32,10 @@ public class WeekFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.week_fragment, container, false);
 
-        //Set title of toolbar
+        // Set title of toolbar
         activity.setTitle("Week");
 
-        //Read tasks from storage and assign them to the correct lists
+        // Read tasks from storage and assign them to the correct lists
         ArrayList<Task> todayList = storageReaderWriter.read(Repeat.TODAY.toString() + ".json");
         ArrayList<Task> everyDayList = storageReaderWriter.read(Repeat.DAILY.toString() + ".json");
         ArrayList<Task> mondayList = storageReaderWriter.read(Repeat.MONDAY.toString() + ".json");
@@ -46,7 +46,7 @@ public class WeekFragment extends Fragment {
         ArrayList<Task> saturdayList = storageReaderWriter.read(Repeat.SATURDAY.toString() + ".json");
         ArrayList<Task> sundayList = storageReaderWriter.read(Repeat.SUNDAY.toString() + ".json");
 
-        //Create a HashMap and put in all the lists
+        // Create a HashMap and put in all the lists
         HashMap<String, ArrayList<Task>> expandableTaskList = new HashMap<>();
         expandableTaskList.put(Repeat.TODAY.toString(), todayList);
         expandableTaskList.put(Repeat.DAILY.toString(), everyDayList);
@@ -58,7 +58,7 @@ public class WeekFragment extends Fragment {
         expandableTaskList.put(Repeat.SATURDAY.toString(), saturdayList);
         expandableTaskList.put(Repeat.SUNDAY.toString(), sundayList);
 
-        //Create and sort a list of the keys in the HashMap
+        // Create and sort a list of the keys in the HashMap
         ArrayList<String> expandableTitleList = new ArrayList<>();
         expandableTitleList.add(Repeat.TODAY.toString());
         expandableTitleList.add(Repeat.DAILY.toString());
@@ -70,11 +70,11 @@ public class WeekFragment extends Fragment {
         expandableTitleList.add(Repeat.SATURDAY.toString());
         expandableTitleList.add(Repeat.SUNDAY.toString());
 
-        //Set up ListView
+        // Set up ListView
         ExpandableListView expandableListView = view.findViewById(R.id.weekList);
         weekTaskExpandableAdapter = new WeekTaskExpandableAdapter(expandableTaskList, expandableTitleList, activity);
         expandableListView.setAdapter(weekTaskExpandableAdapter);
-        //Expand all groups
+        // Expand all groups
         for (int i = 0; i < weekTaskExpandableAdapter.getGroupCount(); i++) {
             expandableListView.expandGroup(i);
         }

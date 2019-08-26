@@ -23,7 +23,7 @@ public class NotificationSchedule {
     /**
      * Schedules a notification for a task using OneTimeWorkRequest
      * provided by the androidx WorkManager library
-     * @param task
+     * @param task A task.
      */
     public void scheduleNotification(Task task) {
         // Create a Data object describing the task to send with the worker
@@ -46,8 +46,8 @@ public class NotificationSchedule {
 
     /**
      * Returns the millisecond delay between now and a task date
-     * @param task
-     * @return long
+     * @param task A task.
+     * @return A long describing the millisecond delay.
      */
     private long getNotificationDelay(Task task) {
         // Get delay in milliseconds
@@ -61,7 +61,7 @@ public class NotificationSchedule {
 
     /**
      * Cancels a scheduled task notification in the androidx WorkManager enqueue
-     * @param id
+     * @param id Integer unique id for task.
      */
     public void cancelScheduledNotification(int id) {
         // The task has a tag with its id as a tag, this cancels that task work

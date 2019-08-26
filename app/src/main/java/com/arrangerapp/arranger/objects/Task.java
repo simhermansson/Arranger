@@ -5,7 +5,6 @@ import com.arrangerapp.arranger.enums.Repeat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +22,10 @@ public class Task {
         id = (int) System.currentTimeMillis();
     }
 
+    /**
+     * Sets private fields of task using regex.
+     * @param input Input sentence
+     */
     private void parseInput(String input) {
         try {
             //Regex for time

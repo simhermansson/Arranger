@@ -49,19 +49,19 @@ public class TodayFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.today_fragment, container, false);
 
-        //Set title of toolbar
+        // Set title of toolbar
         activity.setTitle("Today");
 
-        //Read tasks from storage and assign them to taskList
+        // Read tasks from storage and assign them to taskList
         taskList = dailyTaskReschedule.getAndScheduleTasks();
 
-        //Set up ListView
+        // Set up ListView
         ListView listView = view.findViewById(R.id.taskList);
         listView.setEmptyView(view.findViewById(R.id.list_empty));
         taskAdapter = new TaskAdapter(taskList, activity);
         listView.setAdapter(taskAdapter);
 
-        //Handle the floating action button and the popup input bar
+        // Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +83,12 @@ public class TodayFragment extends Fragment {
         dailyTaskReschedule = new DailyTaskReschedule(activity);
     }
 
+    /**
+     * Opens an EditText dialog view above the keyboard.
+     * @param floatingActionButton
+     */
     private void openInputDialog(final FloatingActionButton floatingActionButton) {
+        // Create dialog for EditText view
         final Dialog inputDialog = new Dialog(activity, R.style.InputDialogTheme);
         inputDialog.setContentView(R.layout.input_dialog);
         WindowManager.LayoutParams params = inputDialog.getWindow().getAttributes();
@@ -95,7 +100,7 @@ public class TodayFragment extends Fragment {
         inputDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                //Close keyboard
+                // Close keyboard
                 InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 
@@ -104,43 +109,22 @@ public class TodayFragment extends Fragment {
         });
         inputDialog.show();
 
-        //Open keyboard
+        // Open keyboard
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
-        //Handle dialog inputs
+        // Handle dialog inputs
         final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputTaskName);
         inputDialogEditTaskName.requestFocus();
-        //TODO create listener for highlighting input text
         AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
         inputDialogImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Get input from EditText field
                 String taskInput = inputDialogEditTaskName.getText().toString();
-                //Check that input field is not empty
+                // Check that input field is not empty
                 if (taskInput.length() > 0) {
-                    //Create and add task to taskList and tell taskAdapter to update
-                    Task task = new Task(taskInput);
-                    int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-                    if (Repeat.TODAY.equals(task.getRepeats())) {
-                        taskList.add(task);
-                        if (task.hasDate()) {
-                            notificationSchedule.scheduleNotification(task);
-                        }
-                    } else if (((dayOfWeek != 1 && task.getRepeats().equals(Repeat.values()[dayOfWeek])) ||
-                            (dayOfWeek == 1 && task.getRepeats().equals(Repeat.SUNDAY))) ||
-                            task.getRepeats().equals(Repeat.DAILY)) {
-                        taskList.add(task);
-                        if (task.hasDate()) {
-                            notificationSchedule.scheduleNotification(task);
-                        }
-                    }
-                    Collections.sort(taskList, new TaskComparator());
-                    taskAdapter.notifyDataSetChanged();
-                    saveTaskToStorage(task);
-
-                    //Save new task to internal storage and cancel dialog
-                    storageReaderWriter.write(Repeat.TODAY.toString() + ".json", taskList);
+                    createTask(taskInput);
                     inputDialog.cancel();
                 } else {
                     inputDialogEditTaskName.requestFocus();
@@ -150,12 +134,44 @@ public class TodayFragment extends Fragment {
         });
     }
 
-    private void saveTaskToStorage(Task task) {
+    /**
+     * Creates and schedules a task and its notifications.
+     * @param input
+     */
+    private void createTask(String input) {
+        Task task = new Task(input);
+
+        // Get current day of week with correct Repeat indexing.
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+
+        // Booleans for checking if task is scheduled for today or is a daily task.
+        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
+        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
+        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+
+        if (oneTimeTask) {
+            taskList.add(task);
+            if (task.hasDate()) {
+                notificationSchedule.scheduleNotification(task);
+            }
+        } else if (scheduledForToday || scheduledDaily) {
+            taskList.add(task);
+            notificationSchedule.scheduleNotification(task);
+        }
+
+        // Sort the new task list.
+        Collections.sort(taskList, new TaskComparator());
+        taskAdapter.notifyDataSetChanged();
+
+        // Save task list to internal storage and task to correct schedule if so needed.
+        storageReaderWriter.write(Repeat.TODAY.toString() + ".json", taskList);
+
         Repeat repeat = task.getRepeats();
-        if (!Repeat.TODAY.equals(repeat)) {
+        boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
+        if (notScheduledForToday) {
             ArrayList<Task> tasks = new StorageReaderWriter(activity).read(repeat.toString() + ".json");
             tasks.add(task);
-            new StorageReaderWriter(activity).write(repeat.toString() + ".json", tasks);
+            storageReaderWriter.write(repeat.toString() + ".json", tasks);
         }
     }
 }

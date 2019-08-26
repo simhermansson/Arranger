@@ -74,7 +74,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             viewHolder.taskCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Remove task from taskList, notify the adapter and write new list to storage
+                    // Remove task from taskList, notify the adapter and write new list to storage
                     tasks.remove(task);
                     notifyDataSetChanged();
                     if (task.hasDate()) {
@@ -82,7 +82,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                     }
                     storageReaderWriter.write(Repeat.TODAY.toString() + ".json", tasks);
 
-                    //Haptic feedback on press
+                    // Haptic feedback on press
                     v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
             });

@@ -31,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Set initial state
+        // Set initial state
         currentState = State.TODAY;
 
-        //Set up toolbar
+        // Set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -51,25 +51,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Set first fragment in FrameLayout to TodayFragment
+        // Set first fragment in FrameLayout to TodayFragment
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.placeholder, new TodayFragment());
         ft.commit();
 
-        //Set first menu item as checked, this case the today item
+        // Set first menu item as checked, this case the today item
         final NavigationView navigationView = findViewById(R.id.navigation);
         navigationView.getMenu().getItem(0).setChecked(true);
 
-        //Set click listeners for menu items in drawer view
+        // Set click listeners for menu items in drawer view
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                        //Initialize FragmentTransaction for changing of fragments
+                        // Initialize FragmentTransaction for changing of fragments
                         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-                        //Check the pressed menu item
-                        //And initialize and switch to that fragment
+                        // Check the pressed menu item and initialize and switch to that fragment
                         menuItem.setChecked(true);
                         switch(menuItem.getItemId()) {
                             case R.id.nav_day:
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                         }
 
-                        //Close drawer
+                        // Close drawer
                         DrawerLayout drawerLayout = findViewById(R.id.drawer);
                         drawerLayout.closeDrawer(GravityCompat.START);
 
