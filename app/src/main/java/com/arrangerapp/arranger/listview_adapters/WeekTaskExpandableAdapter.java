@@ -76,13 +76,13 @@ public class WeekTaskExpandableAdapter extends BaseExpandableListAdapter {
             viewHolder.taskRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Remove task from taskList, notify the adapter and write new list to storage
+                    // Remove task from taskList, notify the adapter and writeList new list to storage
                     expandableTaskList.get(expandableTitleList.get(groupPosition)).remove(task);
                     notifyDataSetChanged();
                     if (task.hasDate()) {
                         notificationSchedule.cancelScheduledNotification(task.getId());
                     }
-                    storageReaderWriter.write(expandableTitleList.get(groupPosition) + ".json",
+                    storageReaderWriter.writeList(expandableTitleList.get(groupPosition) + ".json",
                             expandableTaskList.get(expandableTitleList.get(groupPosition)));
 
                     // Haptic feedback on press

@@ -3,6 +3,7 @@ package com.arrangerapp.arranger.activities;
 import androidx.annotation.NonNull;
 
 import com.arrangerapp.arranger.R;
+import com.arrangerapp.arranger.fragments.ArrangementsFragment;
 import com.arrangerapp.arranger.tools.DailyTaskReschedule;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.FragmentTransaction;
@@ -22,7 +23,7 @@ import com.arrangerapp.arranger.fragments.WeekFragment;
 public class MainActivity extends AppCompatActivity {
 
     private enum State {
-        TODAY, WEEK
+        TODAY, WEEK, ARRANGEMENTS
     }
     private State currentState;
 
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                         switch(menuItem.getItemId()) {
                             case R.id.nav_day:
                                 if (!State.TODAY.equals(currentState)) {
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                     ft.replace(R.id.placeholder, new TodayFragment());
                                     ft.commit();
                                     currentState = State.TODAY;
@@ -80,9 +82,18 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case R.id.nav_week:
                                 if (!State.WEEK.equals(currentState)) {
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                     ft.replace(R.id.placeholder, new WeekFragment());
                                     ft.commit();
                                     currentState = State.WEEK;
+                                }
+                                break;
+                            case R.id.nav_arrangements:
+                                if (!State.ARRANGEMENTS.equals(currentState)) {
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                    ft.replace(R.id.placeholder, new ArrangementsFragment());
+                                    ft.commit();
+                                    currentState = State.ARRANGEMENTS;
                                 }
                                 break;
                         }
@@ -96,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        new DailyTaskReschedule(this);
+        new DailyTaskReschedule(this).scheduleNextWork();
     }
 
     @Override

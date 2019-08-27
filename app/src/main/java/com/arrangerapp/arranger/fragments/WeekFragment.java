@@ -36,15 +36,15 @@ public class WeekFragment extends Fragment {
         activity.setTitle("Week");
 
         // Read tasks from storage and assign them to the correct lists
-        ArrayList<Task> todayList = storageReaderWriter.read(Repeat.TODAY.toString() + ".json");
-        ArrayList<Task> everyDayList = storageReaderWriter.read(Repeat.DAILY.toString() + ".json");
-        ArrayList<Task> mondayList = storageReaderWriter.read(Repeat.MONDAY.toString() + ".json");
-        ArrayList<Task> tuesdayList = storageReaderWriter.read(Repeat.TUESDAY.toString() + ".json");
-        ArrayList<Task> wednesdayList = storageReaderWriter.read(Repeat.WEDNESDAY.toString() + ".json");
-        ArrayList<Task> thursdayList = storageReaderWriter.read(Repeat.THURSDAY.toString() + ".json");
-        ArrayList<Task> fridayList = storageReaderWriter.read(Repeat.FRIDAY.toString() + ".json");
-        ArrayList<Task> saturdayList = storageReaderWriter.read(Repeat.SATURDAY.toString() + ".json");
-        ArrayList<Task> sundayList = storageReaderWriter.read(Repeat.SUNDAY.toString() + ".json");
+        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
+        ArrayList<Task> everyDayList = storageReaderWriter.readTaskList(Repeat.DAILY.toString() + ".json");
+        ArrayList<Task> mondayList = storageReaderWriter.readTaskList(Repeat.MONDAY.toString() + ".json");
+        ArrayList<Task> tuesdayList = storageReaderWriter.readTaskList(Repeat.TUESDAY.toString() + ".json");
+        ArrayList<Task> wednesdayList = storageReaderWriter.readTaskList(Repeat.WEDNESDAY.toString() + ".json");
+        ArrayList<Task> thursdayList = storageReaderWriter.readTaskList(Repeat.THURSDAY.toString() + ".json");
+        ArrayList<Task> fridayList = storageReaderWriter.readTaskList(Repeat.FRIDAY.toString() + ".json");
+        ArrayList<Task> saturdayList = storageReaderWriter.readTaskList(Repeat.SATURDAY.toString() + ".json");
+        ArrayList<Task> sundayList = storageReaderWriter.readTaskList(Repeat.SUNDAY.toString() + ".json");
 
         // Create a HashMap and put in all the lists
         HashMap<String, ArrayList<Task>> expandableTaskList = new HashMap<>();

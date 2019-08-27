@@ -9,5 +9,9 @@
             android:icon="@drawable/ic_view_week_black_24dp"
             android:id="@+id/nav_week"
             android:title="@string/week" />
+        <item
+            android:icon="@drawable/ic_arrangements_black_24dp"
+            android:id="@+id/nav_arrangements"
+            android:title="@string/arrangements" />
     </group>
 </menu>

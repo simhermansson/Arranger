@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/task"
+    android:id="@+id/arrangement"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/cardview_light_background">
 
     <TextView
-        android:id="@+id/taskName"
+        android:id="@+id/arrangementName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
         android:text="@string/placeholder"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:textSize="24sp"
@@ -21,20 +24,6 @@
         app:fontFamily="@font/roboto_light"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/taskTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/anytime"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textSize="18sp"
-        app:fontFamily="@font/roboto_light"
-        app:layout_constraintStart_toStartOf="@+id/taskName"
-        app:layout_constraintTop_toBottomOf="@+id/taskName" />
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/taskCheck"

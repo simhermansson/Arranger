@@ -57,7 +57,7 @@ public class DailyTaskReschedule {
      */
     public ArrayList<Task> getAndScheduleTasks() {
         // Read tasks from storage and assign them to taskList
-        ArrayList<Task> taskList = storageReaderWriter.read(Repeat.TODAY.toString() + ".json");
+        ArrayList<Task> taskList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
 
         // Get current day in int and String form
         int dayOfWeekInt = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1; //Get current day indexed for Repeat
@@ -68,7 +68,7 @@ public class DailyTaskReschedule {
         // If scheduled tasks has not been imported today
         if (!sb.getBoolean(day, false)) {
             // Import and schedule notifications for daily tasks
-            for (Task task : storageReaderWriter.read(Repeat.DAILY.toString() + ".json")) {
+            for (Task task : storageReaderWriter.readTaskList(Repeat.DAILY.toString() + ".json")) {
                 taskList.add(task);
                 if (task.hasDate()) {
                     notificationSchedule.scheduleNotification(task);
@@ -76,7 +76,7 @@ public class DailyTaskReschedule {
             }
 
             // Import and schedule notifications for scheduled tasks
-            for (Task task : storageReaderWriter.read(day + ".json")) {
+            for (Task task : storageReaderWriter.readTaskList(day + ".json")) {
                 taskList.add(task);
                 if (task.hasDate()) {
                     notificationSchedule.scheduleNotification(task);
@@ -85,7 +85,7 @@ public class DailyTaskReschedule {
 
             // Write new tasks for today to storage
             Collections.sort(taskList, new TaskComparator());
-            storageReaderWriter.write(Repeat.TODAY.toString() + ".json", taskList);
+            storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", taskList);
 
             // Get String for previous day
             String previousDay;
