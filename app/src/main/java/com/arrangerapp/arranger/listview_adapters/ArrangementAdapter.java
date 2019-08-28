@@ -75,7 +75,7 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
         final Arrangement arrangement = getItem(position);
         if (arrangement != null) {
             viewHolder.arrangementName.setText(arrangement.getName());
-            //viewHolder.numberOfTasks.setText(arrangement.getNumberOfTasks());
+            viewHolder.numberOfTasks.setText(arrangement.getNumberOfTasks() + " Tasks");
             if (visibleCheckBoxes) {
                 viewHolder.checkBox.setVisibility(View.VISIBLE);
                 if (arrangement.isChecked()) {
@@ -115,5 +115,26 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
         arrangements.removeAll(toBeRemoved);
         notifyDataSetChanged();
         storageReaderWriter.writeList("arrangements.json", arrangements);
+    }
+
+    public void moveCheckedItems() {
+        ArrayList<Task> toBeMoved = new ArrayList<>();
+        for (Arrangement arrangement : arrangements) {
+            if (arrangement.isChecked()) {
+                toBeMoved.addAll(arrangement.getTasks());
+            }
+        }
+        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
+        todayList.addAll(toBeMoved);
+        storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
+    }
+
+    public void uncheckAll() {
+        for (Arrangement arrangement : arrangements) {
+            if (arrangement.isChecked()) {
+                arrangement.check(false);
+            }
+        }
+        notifyDataSetChanged();
     }
 }

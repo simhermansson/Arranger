@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
@@ -37,10 +38,12 @@ public class ArrangementListFragment extends Fragment {
     private StorageReaderWriter storageReaderWriter;
     private MenuItem toolbarEdit;
     private MenuItem toolbarRemove;
+    private MenuItem toolbarMoveTasks;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setHasOptionsMenu(true);
     }
 
@@ -62,7 +65,9 @@ public class ArrangementListFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                activity.openArrangement(arrangementsList.get(position));
+                Arrangement arrangement = arrangementsList.get(position);
+                arrangement.setListIndex(position);
+                activity.openArrangement(arrangement);
             }
         });
 
@@ -89,8 +94,11 @@ public class ArrangementListFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_menu, menu);
+        toolbarEdit = menu.findItem(R.id.edit_arrangements);
         toolbarRemove = menu.findItem(R.id.remove_arrangements);
+        toolbarMoveTasks = menu.findItem(R.id.move_tasks);
         toolbarRemove.setVisible(false);
+        toolbarMoveTasks.setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -99,21 +107,28 @@ public class ArrangementListFragment extends Fragment {
         if (item.getItemId() == R.id.edit_arrangements) {
             if (item.isChecked()) {
                 item.setChecked(false);
-                // Remove checkboxes from arrangements
+                // Remove checkboxes from arrangements.
                 arrangementAdapter.setCheckBoxes(false);
                 arrangementAdapter.notifyDataSetChanged();
+
                 toolbarRemove.setVisible(false);
+                toolbarMoveTasks.setVisible(false);
             } else {
                 item.setChecked(true);
-                // Add checkboxes to arrangements
+                // Add checkboxes to arrangements.
                 arrangementAdapter.setCheckBoxes(true);
                 arrangementAdapter.notifyDataSetChanged();
+
                 toolbarRemove.setVisible(true);
+                toolbarMoveTasks.setVisible(true);
             }
             return true;
         } else if (item.getItemId() == R.id.remove_arrangements) {
-            // Remove checked items
-            arrangementAdapter.removeCheckedItems();
+            // Remove checked items.
+            showDeleteAlert();
+        } else if (item.getItemId() == R.id.move_tasks) {
+            // Move checked items to today.
+            showMoveAlert();
         }
         return false;
     }
@@ -171,5 +186,46 @@ public class ArrangementListFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void showMoveAlert() {
+        new AlertDialog.Builder(activity)
+                .setTitle("Copy Arrangements")
+                .setMessage("Copy marked arrangements to today?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        arrangementAdapter.moveCheckedItems();
+                        resetToolbar();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void showDeleteAlert() {
+        new AlertDialog.Builder(activity)
+                .setTitle("Delete Arrangements")
+                .setMessage("Delete marked arrangements?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        arrangementAdapter.removeCheckedItems();
+                        resetToolbar();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void resetToolbar() {
+        // Remove checkboxes and set edit unchecked
+        arrangementAdapter.uncheckAll();
+        arrangementAdapter.setCheckBoxes(false);
+        toolbarEdit.setChecked(false);
+
+        // Set remove and move button invisible.
+        toolbarRemove.setVisible(false);
+        toolbarMoveTasks.setVisible(false);
     }
 }

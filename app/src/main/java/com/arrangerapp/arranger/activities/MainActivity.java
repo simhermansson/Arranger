@@ -23,10 +23,9 @@ import com.arrangerapp.arranger.fragments.TodayFragment;
 import com.arrangerapp.arranger.fragments.WeekFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private MenuItem menuItem;
 
     private enum State {
-        TODAY, WEEK, ARRANGEMENTS
+        TODAY, WEEK, ARRANGEMENTS, ARRANGEMENT
     }
     private State currentState;
 
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                         switch(menuItem.getItemId()) {
                             case R.id.nav_day:
                                 if (!State.TODAY.equals(currentState)) {
-                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new TodayFragment());
                                     ft.commit();
                                     currentState = State.TODAY;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case R.id.nav_week:
                                 if (!State.WEEK.equals(currentState)) {
-                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new WeekFragment());
                                     ft.addToBackStack(null);
                                     ft.commit();
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case R.id.nav_arrangements:
                                 if (!State.ARRANGEMENTS.equals(currentState)) {
-                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new ArrangementListFragment());
                                     ft.addToBackStack(null);
                                     ft.commit();
@@ -121,5 +120,6 @@ public class MainActivity extends AppCompatActivity {
         ft.replace(R.id.placeholder, ArrangementFragment.newInstance(arrangement));
         ft.addToBackStack(null);
         ft.commit();
+        currentState = State.ARRANGEMENT;
     }
 }

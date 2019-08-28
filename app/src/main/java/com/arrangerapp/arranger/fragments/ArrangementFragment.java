@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -13,13 +16,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.enums.Repeat;
-import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
+import com.arrangerapp.arranger.listview_adapters.ArrangementTaskAdapter;
 import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
@@ -27,17 +31,21 @@ import com.arrangerapp.arranger.tools.StorageReaderWriter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 
 public class ArrangementFragment extends Fragment {
     private MainActivity activity;
     private Arrangement arrangement;
     private ArrayList<Task> tasks;
+    private ArrangementTaskAdapter arrangementTaskAdapter;
+    private StorageReaderWriter storageReaderWriter;
+    private MenuItem toolbarMoveToToday;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
             arrangement = getArguments().getParcelable("Arrangement");
@@ -53,10 +61,10 @@ public class ArrangementFragment extends Fragment {
         activity.setTitle(arrangement.getName());
 
         // Set up ListView
-        ListView listView = view.findViewById(R.id.taskList);
-        listView.setEmptyView(view.findViewById(R.id.list_empty));
-        taskAdapter = new TaskAdapter(taskList, activity);
-        listView.setAdapter(taskAdapter);
+        ListView listView = view.findViewById(R.id.arrangementTaskList);
+        listView.setEmptyView(view.findViewById(R.id.arrangement_empty));
+        arrangementTaskAdapter = new ArrangementTaskAdapter(tasks, activity);
+        listView.setAdapter(arrangementTaskAdapter);
 
         // Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
@@ -75,6 +83,26 @@ public class ArrangementFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (MainActivity) context;
+        storageReaderWriter = new StorageReaderWriter(activity);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_menu, menu);
+        MenuItem toolbarRemove = menu.findItem(R.id.remove_arrangements);
+        MenuItem toolbarEdit = menu.findItem(R.id.edit_arrangements);
+        toolbarRemove.setVisible(false);
+        toolbarEdit.setVisible(false);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.move_tasks) {
+            showMoveAlert();
+            return true;
+        }
+        return false;
     }
 
     public static ArrangementFragment newInstance(Arrangement arrangement) {
@@ -112,12 +140,13 @@ public class ArrangementFragment extends Fragment {
         });
         inputDialog.show();
 
-        // Open keyboard
+        // Open keyboard.
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
-        // Handle dialog inputs
+        // Handle dialog inputs.
         final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputText);
+        inputDialogEditTaskName.setHint(getString(R.string.arrangement_task_hint));
         inputDialogEditTaskName.requestFocus();
         AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
         inputDialogImageButton.setOnClickListener(new View.OnClickListener() {
@@ -138,43 +167,40 @@ public class ArrangementFragment extends Fragment {
     }
 
     /**
-     * Creates and schedules a task and its notifications.
-     * @param input
+     * Creates a task.
+     * @param input Task name, time and date.
      */
     private void createTask(String input) {
         Task task = new Task(input);
 
-        // Get current day of week with correct Repeat indexing.
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+        // Add task to task list.
+        arrangement.addTask(task);
 
-        // Booleans for checking if task is scheduled for today or is a daily task.
-        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
-        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
-        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+        // Sort the new task list and notify adapter.
+        Collections.sort(tasks, new TaskComparator());
+        arrangementTaskAdapter.notifyDataSetChanged();
 
-        if (oneTimeTask) {
-            taskList.add(task);
-            if (task.hasDate()) {
-                notificationSchedule.scheduleNotification(task);
-            }
-        } else if (scheduledForToday || scheduledDaily) {
-            taskList.add(task);
-            notificationSchedule.scheduleNotification(task);
-        }
+        // Save new task list in storage.
+        ArrayList<Arrangement> arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
+        arrangementsList.set(arrangement.getListIndex(), arrangement);
+        storageReaderWriter.writeList("arrangements.json", arrangementsList);
+    }
 
-        // Sort the new task list.
-        Collections.sort(taskList, new TaskComparator());
-        taskAdapter.notifyDataSetChanged();
-
-        // Save task list to internal storage and task to correct schedule if so needed.
-        storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", taskList);
-
-        Repeat repeat = task.getRepeats();
-        boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
-        if (notScheduledForToday) {
-            ArrayList<Task> tasks = new StorageReaderWriter(activity).readTaskList(repeat.toString() + ".json");
-            tasks.add(task);
-            storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
-        }
+    private void showMoveAlert() {
+        new AlertDialog.Builder(activity)
+                .setTitle("Copy Arrangement")
+                .setMessage("Copy arrangement tasks to today?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Move tasks to today list.
+                        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
+                        todayList.addAll(tasks);
+                        Collections.sort(todayList, new TaskComparator());
+                        storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

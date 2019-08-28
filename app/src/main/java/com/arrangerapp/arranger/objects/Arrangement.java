@@ -9,6 +9,7 @@ public class Arrangement implements Parcelable {
     private String name;
     private ArrayList<Task> tasks;
     private boolean checked;
+    private int listIndex;
 
     public Arrangement(String name) {
         this.name = name;
@@ -26,6 +27,7 @@ public class Arrangement implements Parcelable {
         dest.writeString(name);
         dest.writeList(tasks);
         dest.writeByte((byte) (checked ? 1 : 0));
+        dest.writeInt(listIndex);
     }
 
     public static final Parcelable.Creator<Arrangement> CREATOR
@@ -45,6 +47,15 @@ public class Arrangement implements Parcelable {
         name = in.readString();
         in.readList(tasks, Task.class.getClassLoader());
         checked = in.readByte() != 0;
+        listIndex = in.readInt();
+    }
+
+    public void setListIndex(int index) {
+        listIndex = index;
+    }
+
+    public int getListIndex() {
+        return listIndex;
     }
 
     public void addTask(Task task) {

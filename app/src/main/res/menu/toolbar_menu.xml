@@ -10,6 +10,14 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/move_tasks"
+        android:checkable="true"
+        android:orderInCategory="300"
+        android:title="Edit"
+        android:icon="@drawable/ic_move_to_inbox_white_24dp"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/edit_arrangements"
         android:checkable="true"
         android:orderInCategory="300"
