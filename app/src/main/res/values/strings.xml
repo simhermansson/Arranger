@@ -11,4 +11,5 @@
     <string name="no_arrangements">No arrangements here!\nAdd more by pressing the red button below.</string>
     <string name="channel_name">ALARM_SERVICE</string>
     <string name="channel_description">ALARM_SERVICE</string>
+    <string name="zero_tasks">0 tasks</string>
 </resources>

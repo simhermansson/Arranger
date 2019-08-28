@@ -4,62 +4,67 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-import com.arrangerapp.arranger.tools.DailyTaskReschedule;
-import com.arrangerapp.arranger.tools.NotificationSchedule;
-import com.arrangerapp.arranger.tools.StorageReaderWriter;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.widget.AppCompatImageButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.arrangerapp.arranger.activities.MainActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.fragment.app.Fragment;
+
 import com.arrangerapp.arranger.R;
-import com.arrangerapp.arranger.enums.Repeat;
-import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
-import com.arrangerapp.arranger.objects.Task;
-import com.arrangerapp.arranger.objects.TaskComparator;
+import com.arrangerapp.arranger.activities.MainActivity;
+import com.arrangerapp.arranger.listview_adapters.ArrangementAdapter;
+import com.arrangerapp.arranger.objects.Arrangement;
+import com.arrangerapp.arranger.tools.StorageReaderWriter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 
 
-public class TodayFragment extends Fragment {
+public class ArrangementListFragment extends Fragment {
     private MainActivity activity;
-    private ArrayList<Task> taskList;
-    private TaskAdapter taskAdapter;
+    private ArrayList<Arrangement> arrangementsList;
+    private ArrangementAdapter arrangementAdapter;
     private StorageReaderWriter storageReaderWriter;
-    private NotificationSchedule notificationSchedule;
-    private DailyTaskReschedule dailyTaskReschedule;
+    private MenuItem toolbarEdit;
+    private MenuItem toolbarRemove;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.today_fragment, container, false);
+        View view = inflater.inflate(R.layout.arrangement_list_fragment, container, false);
 
         // Set title of toolbar
-        activity.setTitle("Today");
+        activity.setTitle("Arrangements");
 
-        // Read tasks from storage and assign them to taskList
-        taskList = dailyTaskReschedule.getAndScheduleTasks();
+        // Read arrangements from storage and assign them to arrangementsList
+        arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
 
-        // Set up ListView
-        ListView listView = view.findViewById(R.id.taskList);
-        listView.setEmptyView(view.findViewById(R.id.list_empty));
-        taskAdapter = new TaskAdapter(taskList, activity);
-        listView.setAdapter(taskAdapter);
+        // Set up arrangements list view and its adapter.
+        ListView listView = view.findViewById(R.id.arrangementsList);
+        listView.setEmptyView(view.findViewById(R.id.arrangements_empty));
+        arrangementAdapter = new ArrangementAdapter(arrangementsList, activity);
+        listView.setAdapter(arrangementAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                activity.openArrangement(arrangementsList.get(position));
+            }
+        });
 
         // Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
@@ -79,8 +84,38 @@ public class TodayFragment extends Fragment {
         super.onAttach(context);
         activity = (MainActivity) context;
         storageReaderWriter = new StorageReaderWriter(activity);
-        notificationSchedule = new NotificationSchedule(activity);
-        dailyTaskReschedule = new DailyTaskReschedule(activity);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_menu, menu);
+        toolbarRemove = menu.findItem(R.id.remove_arrangements);
+        toolbarRemove.setVisible(false);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.edit_arrangements) {
+            if (item.isChecked()) {
+                item.setChecked(false);
+                // Remove checkboxes from arrangements
+                arrangementAdapter.setCheckBoxes(false);
+                arrangementAdapter.notifyDataSetChanged();
+                toolbarRemove.setVisible(false);
+            } else {
+                item.setChecked(true);
+                // Add checkboxes to arrangements
+                arrangementAdapter.setCheckBoxes(true);
+                arrangementAdapter.notifyDataSetChanged();
+                toolbarRemove.setVisible(true);
+            }
+            return true;
+        } else if (item.getItemId() == R.id.remove_arrangements) {
+            // Remove checked items
+            arrangementAdapter.removeCheckedItems();
+        }
+        return false;
     }
 
     /**
@@ -115,64 +150,26 @@ public class TodayFragment extends Fragment {
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
         // Handle dialog inputs
-        final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputText);
-        inputDialogEditTaskName.requestFocus();
+        final EditText inputDialogEditArrangement = inputDialog.findViewById(R.id.inputText);
+        inputDialogEditArrangement.setHint(getString(R.string.arrangement_hint));
+        inputDialogEditArrangement.requestFocus();
         AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
         inputDialogImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Get input from EditText field
-                String taskInput = inputDialogEditTaskName.getText().toString();
+                String name = inputDialogEditArrangement.getText().toString();
                 // Check that input field is not empty
-                if (taskInput.length() > 0) {
-                    createTask(taskInput);
+                if (name.length() > 0) {
+                    arrangementsList.add(new Arrangement(name));
+                    arrangementAdapter.notifyDataSetChanged();
+                    storageReaderWriter.writeList("arrangements.json", arrangementsList);
                     inputDialog.cancel();
                 } else {
-                    inputDialogEditTaskName.requestFocus();
-                    inputDialogEditTaskName.setError("This field cannot be blank");
+                    inputDialogEditArrangement.requestFocus();
+                    inputDialogEditArrangement.setError("This field cannot be blank");
                 }
             }
         });
-    }
-
-    /**
-     * Creates and schedules a task and its notifications.
-     * @param input
-     */
-    private void createTask(String input) {
-        Task task = new Task(input);
-
-        // Get current day of week with correct Repeat indexing.
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
-
-        // Booleans for checking if task is scheduled for today or is a daily task.
-        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
-        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
-        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
-
-        if (oneTimeTask) {
-            taskList.add(task);
-            if (task.hasDate()) {
-                notificationSchedule.scheduleNotification(task);
-            }
-        } else if (scheduledForToday || scheduledDaily) {
-            taskList.add(task);
-            notificationSchedule.scheduleNotification(task);
-        }
-
-        // Sort the new task list.
-        Collections.sort(taskList, new TaskComparator());
-        taskAdapter.notifyDataSetChanged();
-
-        // Save task list to internal storage and task to correct schedule if so needed.
-        storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", taskList);
-
-        Repeat repeat = task.getRepeats();
-        boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
-        if (notScheduledForToday) {
-            ArrayList<Task> tasks = new StorageReaderWriter(activity).readTaskList(repeat.toString() + ".json");
-            tasks.add(task);
-            storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
-        }
     }
 }

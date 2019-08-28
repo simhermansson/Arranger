@@ -18,40 +18,45 @@ import androidx.fragment.app.Fragment;
 
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.activities.MainActivity;
-import com.arrangerapp.arranger.listview_adapters.ArrangementAdapter;
+import com.arrangerapp.arranger.enums.Repeat;
+import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
 import com.arrangerapp.arranger.objects.Arrangement;
+import com.arrangerapp.arranger.objects.Task;
+import com.arrangerapp.arranger.objects.TaskComparator;
 import com.arrangerapp.arranger.tools.StorageReaderWriter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 
-
-public class ArrangementsFragment extends Fragment {
+public class ArrangementFragment extends Fragment {
     private MainActivity activity;
-    private ArrayList<Arrangement> arrangementsList;
-    private ArrangementAdapter arrangementAdapter;
-    private StorageReaderWriter storageReaderWriter;
+    private Arrangement arrangement;
+    private ArrayList<Task> tasks;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            arrangement = getArguments().getParcelable("Arrangement");
+            tasks = arrangement.getTasks();
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.arrangements_fragment, container, false);
+        View view = inflater.inflate(R.layout.arrangement_fragment, container, false);
 
         // Set title of toolbar
-        activity.setTitle("Arrangements");
-
-        // Read arrangements from storage and assign them to arrangementsList
-        arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
+        activity.setTitle(arrangement.getName());
 
         // Set up ListView
-        ListView listView = view.findViewById(R.id.arrangementsList);
-        listView.setEmptyView(view.findViewById(R.id.arrangements_empty));
-        arrangementAdapter = new ArrangementAdapter(arrangementsList, activity);
-        listView.setAdapter(arrangementAdapter);
+        ListView listView = view.findViewById(R.id.taskList);
+        listView.setEmptyView(view.findViewById(R.id.list_empty));
+        taskAdapter = new TaskAdapter(taskList, activity);
+        listView.setAdapter(taskAdapter);
 
         // Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
@@ -70,7 +75,14 @@ public class ArrangementsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (MainActivity) context;
-        storageReaderWriter = new StorageReaderWriter(activity);
+    }
+
+    public static ArrangementFragment newInstance(Arrangement arrangement) {
+        ArrangementFragment arrangementFragment = new ArrangementFragment();
+        Bundle args = new Bundle();
+        args.putParcelable("Arrangement", arrangement);
+        arrangementFragment.setArguments(args);
+        return arrangementFragment;
     }
 
     /**
@@ -105,20 +117,17 @@ public class ArrangementsFragment extends Fragment {
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
         // Handle dialog inputs
-        final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputTaskName);
-        inputDialogEditTaskName.setHint(getString(R.string.arrangement_hint));
+        final EditText inputDialogEditTaskName = inputDialog.findViewById(R.id.inputText);
         inputDialogEditTaskName.requestFocus();
         AppCompatImageButton inputDialogImageButton = inputDialog.findViewById(R.id.inputImageButton);
         inputDialogImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Get input from EditText field
-                String name = inputDialogEditTaskName.getText().toString();
+                String taskInput = inputDialogEditTaskName.getText().toString();
                 // Check that input field is not empty
-                if (name.length() > 0) {
-                    arrangementsList.add(new Arrangement(name));
-                    arrangementAdapter.notifyDataSetChanged();
-                    storageReaderWriter.writeList("arrangements.json", arrangementsList);
+                if (taskInput.length() > 0) {
+                    createTask(taskInput);
                     inputDialog.cancel();
                 } else {
                     inputDialogEditTaskName.requestFocus();
@@ -126,5 +135,46 @@ public class ArrangementsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    /**
+     * Creates and schedules a task and its notifications.
+     * @param input
+     */
+    private void createTask(String input) {
+        Task task = new Task(input);
+
+        // Get current day of week with correct Repeat indexing.
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+
+        // Booleans for checking if task is scheduled for today or is a daily task.
+        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
+        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
+        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+
+        if (oneTimeTask) {
+            taskList.add(task);
+            if (task.hasDate()) {
+                notificationSchedule.scheduleNotification(task);
+            }
+        } else if (scheduledForToday || scheduledDaily) {
+            taskList.add(task);
+            notificationSchedule.scheduleNotification(task);
+        }
+
+        // Sort the new task list.
+        Collections.sort(taskList, new TaskComparator());
+        taskAdapter.notifyDataSetChanged();
+
+        // Save task list to internal storage and task to correct schedule if so needed.
+        storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", taskList);
+
+        Repeat repeat = task.getRepeats();
+        boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
+        if (notScheduledForToday) {
+            ArrayList<Task> tasks = new StorageReaderWriter(activity).readTaskList(repeat.toString() + ".json");
+            tasks.add(task);
+            storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
+        }
     }
 }

@@ -48,7 +48,7 @@ public class DailyTaskReschedule {
                 .build();
 
         // Enqueue the OneTimeWorkRequest
-        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, enqueueNotification);
+        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.APPEND, enqueueNotification);
     }
 
     /**
@@ -100,6 +100,9 @@ public class DailyTaskReschedule {
             editor.putBoolean(day, true);
             editor.putBoolean(previousDay, false);
             editor.apply();
+
+            // Start midnight update loop
+            scheduleNextWork();
         }
 
         return taskList;

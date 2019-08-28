@@ -3,7 +3,9 @@ package com.arrangerapp.arranger.activities;
 import androidx.annotation.NonNull;
 
 import com.arrangerapp.arranger.R;
-import com.arrangerapp.arranger.fragments.ArrangementsFragment;
+import com.arrangerapp.arranger.fragments.ArrangementFragment;
+import com.arrangerapp.arranger.fragments.ArrangementListFragment;
+import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.tools.DailyTaskReschedule;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.FragmentTransaction;
@@ -21,6 +23,7 @@ import com.arrangerapp.arranger.fragments.TodayFragment;
 import com.arrangerapp.arranger.fragments.WeekFragment;
 
 public class MainActivity extends AppCompatActivity {
+    private MenuItem menuItem;
 
     private enum State {
         TODAY, WEEK, ARRANGEMENTS
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (!State.WEEK.equals(currentState)) {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                     ft.replace(R.id.placeholder, new WeekFragment());
+                                    ft.addToBackStack(null);
                                     ft.commit();
                                     currentState = State.WEEK;
                                 }
@@ -91,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.nav_arrangements:
                                 if (!State.ARRANGEMENTS.equals(currentState)) {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                                    ft.replace(R.id.placeholder, new ArrangementsFragment());
+                                    ft.replace(R.id.placeholder, new ArrangementListFragment());
+                                    ft.addToBackStack(null);
                                     ft.commit();
                                     currentState = State.ARRANGEMENTS;
                                 }
@@ -107,11 +112,14 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        new DailyTaskReschedule(this).scheduleNextWork();
+        new DailyTaskReschedule(this).getAndScheduleTasks();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void openArrangement(Arrangement arrangement) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.replace(R.id.placeholder, ArrangementFragment.newInstance(arrangement));
+        ft.addToBackStack(null);
+        ft.commit();
     }
 }

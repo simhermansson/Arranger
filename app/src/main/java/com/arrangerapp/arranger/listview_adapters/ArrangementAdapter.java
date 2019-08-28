@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -26,6 +27,7 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
     private MainActivity mainActivity;
     private StorageReaderWriter storageReaderWriter;
     private NotificationSchedule notificationSchedule;
+    private boolean visibleCheckBoxes;
 
     public ArrangementAdapter(ArrayList<Arrangement> arrangements, Context context) {
         super(context, R.layout.task_view, arrangements);
@@ -34,6 +36,7 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
         mainActivity = (MainActivity) context;
         storageReaderWriter = new StorageReaderWriter(mainActivity);
         notificationSchedule = new NotificationSchedule(mainActivity);
+        visibleCheckBoxes = false;
     }
 
     @Override
@@ -48,6 +51,8 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
 
     static class ViewHolderItem {
         TextView arrangementName;
+        TextView numberOfTasks;
+        CheckBox checkBox;
     }
 
     @Override
@@ -59,6 +64,8 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
 
             viewHolder = new ViewHolderItem();
             viewHolder.arrangementName = (TextView) convertView.findViewById(R.id.arrangementName);
+            viewHolder.numberOfTasks = (TextView) convertView.findViewById(R.id.numberOfTasks);
+            viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
             convertView.setTag(viewHolder);
 
         } else {
@@ -68,8 +75,45 @@ public class ArrangementAdapter extends ArrayAdapter<Arrangement> {
         final Arrangement arrangement = getItem(position);
         if (arrangement != null) {
             viewHolder.arrangementName.setText(arrangement.getName());
+            //viewHolder.numberOfTasks.setText(arrangement.getNumberOfTasks());
+            if (visibleCheckBoxes) {
+                viewHolder.checkBox.setVisibility(View.VISIBLE);
+                if (arrangement.isChecked()) {
+                    viewHolder.checkBox.setChecked(true);
+                } else {
+                    viewHolder.checkBox.setChecked(false);
+                }
+                viewHolder.checkBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (viewHolder.checkBox.isChecked()) {
+                            arrangement.check(true);
+                        } else {
+                            arrangement.check(false);
+                        }
+                    }
+                });
+            } else {
+                viewHolder.checkBox.setVisibility(View.INVISIBLE);
+            }
         }
 
         return convertView;
+    }
+
+    public void setCheckBoxes(boolean visible) {
+        visibleCheckBoxes = visible;
+    }
+
+    public void removeCheckedItems() {
+        ArrayList<Arrangement> toBeRemoved = new ArrayList<>();
+        for (Arrangement arrangement : arrangements) {
+            if (arrangement.isChecked()) {
+                toBeRemoved.add(arrangement);
+            }
+        }
+        arrangements.removeAll(toBeRemoved);
+        notifyDataSetChanged();
+        storageReaderWriter.writeList("arrangements.json", arrangements);
     }
 }

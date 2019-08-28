@@ -1,5 +1,8 @@
 package com.arrangerapp.arranger.objects;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.arrangerapp.arranger.enums.Repeat;
 
 import java.text.ParseException;
@@ -8,7 +11,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Task {
+public class Task implements Parcelable {
     private String name;
     private Date date;
     private Repeat repeats;
@@ -18,8 +21,43 @@ public class Task {
     public Task(String input) {
         hasDate = false;
         parseInput(input);
-        //Create unique id
+        // Create unique id
         id = (int) System.currentTimeMillis();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeLong(date.getTime());
+        dest.writeInt(repeats.ordinal());
+        dest.writeByte((byte) (hasDate ? 1 : 0));
+        dest.writeInt(id);
+    }
+
+    public static final Parcelable.Creator<Task> CREATOR
+            = new Parcelable.Creator<Task>() {
+        @Override
+        public Task createFromParcel(Parcel in) {
+            return new Task(in);
+        }
+
+        @Override
+        public Task[] newArray(int size) {
+            return new Task[size];
+        }
+    };
+
+    private Task(Parcel in) {
+        name = in.readString();
+        date = new Date(in.readLong());
+        repeats = Repeat.values()[in.readInt()];
+        hasDate = in.readByte() != 0;
+        id = in.readInt();
     }
 
     /**
@@ -28,20 +66,20 @@ public class Task {
      */
     private void parseInput(String input) {
         try {
-            //Regex for time
+            // Regex for time
             String hours = "(0[0-9]|1[0-9]|2[0-9]|[0-9])";
             String dividers = "[:.,]?";
             String minutes = "([0-5][0-9])?";
             String amPm = "\\s?([AaPp][Mm])?";
             String hoursAndMinutes = "(" + hours + dividers + minutes + amPm + ")?";
-            //Regex for taskName
+            // Regex for taskName
             String taskName = "(.+?(?=\\bat\\b|\\b[0-9]|$))(?:at\\s)?";
-            //Regex for taskRepeat
+            // Regex for taskRepeat
             String taskRepeat = "\\s?(.+)?";
-            //Putting the regex together so the variables below can be extracted
+            // Putting the regex together so the variables below can be extracted
             String taskPattern =  taskName + hoursAndMinutes + taskRepeat;
 
-            //Find name, time and repetitions by regex
+            // Find name, time and repetitions by regex
             String time = null;
             String hour = null;
             String minute = null;
@@ -50,7 +88,7 @@ public class Task {
             Pattern pattern = Pattern.compile(taskPattern);
             Matcher matcher = pattern.matcher(input);
             while (matcher.find()) {
-                //Set taskName
+                // Set taskName
                 name = matcher.group(1);
 
                 //Set local variables to time and repeat matches
@@ -61,7 +99,8 @@ public class Task {
                 repeat = matcher.group(6);
             }
 
-            //Parse the time format
+            // Parse the time format
+            // TODO make this better. And if no am/pm and no 24 hour time, check current time.
             if (time != null) {
 
                 if (hour != null) {
@@ -80,7 +119,7 @@ public class Task {
                 }
             }
 
-            //Parse repetitions
+            // Parse repetitions
             if (repeat != null) {
                 switch (repeat) {
                     case "every day":

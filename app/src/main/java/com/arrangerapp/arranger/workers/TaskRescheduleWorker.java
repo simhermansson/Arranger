@@ -25,7 +25,6 @@ public class TaskRescheduleWorker extends Worker {
         // Do the work here
         DailyTaskReschedule dailyTaskReschedule = new DailyTaskReschedule(context);
         dailyTaskReschedule.getAndScheduleTasks();
-        dailyTaskReschedule.scheduleNextWork();
 
         // Indicate whether the task finished successfully
         return Result.success();
