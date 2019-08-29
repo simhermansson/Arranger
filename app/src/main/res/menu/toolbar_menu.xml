@@ -10,6 +10,14 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/show_notes"
+        android:checkable="true"
+        android:orderInCategory="300"
+        android:title="Show notes"
+        android:icon="@drawable/ic_notes_white_24dp"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/move_tasks"
         android:checkable="true"
         android:orderInCategory="300"

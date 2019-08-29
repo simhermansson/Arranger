@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.activities.MainActivity;
-import com.arrangerapp.arranger.listview_adapters.ArrangementAdapter;
+import com.arrangerapp.arranger.listview_adapters.ArrangementListAdapter;
 import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.tools.StorageReaderWriter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 public class ArrangementListFragment extends Fragment {
     private MainActivity activity;
     private ArrayList<Arrangement> arrangementsList;
-    private ArrangementAdapter arrangementAdapter;
+    private ArrangementListAdapter arrangementListAdapter;
     private StorageReaderWriter storageReaderWriter;
     private MenuItem toolbarEdit;
     private MenuItem toolbarRemove;
@@ -60,8 +60,8 @@ public class ArrangementListFragment extends Fragment {
         // Set up arrangements list view and its adapter.
         ListView listView = view.findViewById(R.id.arrangementsList);
         listView.setEmptyView(view.findViewById(R.id.arrangements_empty));
-        arrangementAdapter = new ArrangementAdapter(arrangementsList, activity);
-        listView.setAdapter(arrangementAdapter);
+        arrangementListAdapter = new ArrangementListAdapter(arrangementsList, activity);
+        listView.setAdapter(arrangementListAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -97,6 +97,8 @@ public class ArrangementListFragment extends Fragment {
         toolbarEdit = menu.findItem(R.id.edit_arrangements);
         toolbarRemove = menu.findItem(R.id.remove_arrangements);
         toolbarMoveTasks = menu.findItem(R.id.move_tasks);
+        MenuItem notes = menu.findItem(R.id.show_notes);
+        notes.setVisible(false);
         toolbarRemove.setVisible(false);
         toolbarMoveTasks.setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
@@ -108,16 +110,16 @@ public class ArrangementListFragment extends Fragment {
             if (item.isChecked()) {
                 item.setChecked(false);
                 // Remove checkboxes from arrangements.
-                arrangementAdapter.setCheckBoxes(false);
-                arrangementAdapter.notifyDataSetChanged();
+                arrangementListAdapter.setCheckBoxes(false);
+                arrangementListAdapter.notifyDataSetChanged();
 
                 toolbarRemove.setVisible(false);
                 toolbarMoveTasks.setVisible(false);
             } else {
                 item.setChecked(true);
                 // Add checkboxes to arrangements.
-                arrangementAdapter.setCheckBoxes(true);
-                arrangementAdapter.notifyDataSetChanged();
+                arrangementListAdapter.setCheckBoxes(true);
+                arrangementListAdapter.notifyDataSetChanged();
 
                 toolbarRemove.setVisible(true);
                 toolbarMoveTasks.setVisible(true);
@@ -177,7 +179,7 @@ public class ArrangementListFragment extends Fragment {
                 // Check that input field is not empty
                 if (name.length() > 0) {
                     arrangementsList.add(new Arrangement(name));
-                    arrangementAdapter.notifyDataSetChanged();
+                    arrangementListAdapter.notifyDataSetChanged();
                     storageReaderWriter.writeList("arrangements.json", arrangementsList);
                     inputDialog.cancel();
                 } else {
@@ -195,7 +197,7 @@ public class ArrangementListFragment extends Fragment {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        arrangementAdapter.moveCheckedItems();
+                        arrangementListAdapter.moveCheckedItems();
                         resetToolbar();
                     }
                 })
@@ -210,7 +212,7 @@ public class ArrangementListFragment extends Fragment {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        arrangementAdapter.removeCheckedItems();
+                        arrangementListAdapter.removeCheckedItems();
                         resetToolbar();
                     }
                 })
@@ -220,8 +222,8 @@ public class ArrangementListFragment extends Fragment {
 
     private void resetToolbar() {
         // Remove checkboxes and set edit unchecked
-        arrangementAdapter.uncheckAll();
-        arrangementAdapter.setCheckBoxes(false);
+        arrangementListAdapter.uncheckAll();
+        arrangementListAdapter.setCheckBoxes(false);
         toolbarEdit.setChecked(false);
 
         // Set remove and move button invisible.

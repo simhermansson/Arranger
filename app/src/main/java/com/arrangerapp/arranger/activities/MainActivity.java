@@ -8,6 +8,8 @@ import com.arrangerapp.arranger.fragments.ArrangementListFragment;
 import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.tools.DailyTaskReschedule;
 import com.google.android.material.navigation.NavigationView;
+
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -76,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
                         switch(menuItem.getItemId()) {
                             case R.id.nav_day:
                                 if (!State.TODAY.equals(currentState)) {
+                                    // Clear back stack.
+                                    FragmentManager fm = getSupportFragmentManager();
+                                    for (int i = 0; i < fm.getBackStackEntryCount(); i++) {
+                                        fm.popBackStack();
+                                    }
+
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new TodayFragment());
                                     ft.commit();

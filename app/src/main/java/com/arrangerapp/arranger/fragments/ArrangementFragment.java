@@ -4,7 +4,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,9 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -23,7 +27,7 @@ import androidx.fragment.app.Fragment;
 import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.activities.MainActivity;
 import com.arrangerapp.arranger.enums.Repeat;
-import com.arrangerapp.arranger.listview_adapters.ArrangementTaskAdapter;
+import com.arrangerapp.arranger.listview_adapters.ArrangementAdapter;
 import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
@@ -37,9 +41,11 @@ public class ArrangementFragment extends Fragment {
     private MainActivity activity;
     private Arrangement arrangement;
     private ArrayList<Task> tasks;
-    private ArrangementTaskAdapter arrangementTaskAdapter;
+    private ArrangementAdapter arrangementAdapter;
     private StorageReaderWriter storageReaderWriter;
+    private EditText notes;
     private MenuItem toolbarMoveToToday;
+    private MenuItem toolbarNotes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,17 +60,47 @@ public class ArrangementFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.arrangement_fragment, container, false);
 
-        // Set title of toolbar
+        // Set title of toolbar.
         activity.setTitle(arrangement.getName());
 
-        // Set up ListView
+        // Set up notes if enabled.
+        notes = view.findViewById(R.id.notes);
+        notes.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        notes.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        if (arrangement.hasNotes()) {
+            notes.setText(arrangement.getNotes());
+        }
+
+        // Listening for done press on keyboard.
+        notes.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    // Hide keyboard and clear focus from notes.
+                    InputMethodManager imm = (InputMethodManager) notes.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(notes.getWindowToken(), 0);
+                    notes.clearFocus();
+
+                    // Save notes to arrangement and to storage.
+                    saveArrangementToStorage();
+                }
+                return true;
+            }
+        });
+
+        // Hide notes by default.
+        if (!arrangement.hasNotesEnabled()) {
+            notes.setVisibility(View.GONE);
+        }
+
+        // Set up ListView.
         ListView listView = view.findViewById(R.id.arrangementTaskList);
         listView.setEmptyView(view.findViewById(R.id.arrangement_empty));
-        arrangementTaskAdapter = new ArrangementTaskAdapter(tasks, activity);
-        listView.setAdapter(arrangementTaskAdapter);
+        arrangementAdapter = new ArrangementAdapter(tasks, activity, arrangement);
+        listView.setAdapter(arrangementAdapter);
 
         // Handle the floating action button and the popup input bar
         final FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
@@ -91,6 +127,7 @@ public class ArrangementFragment extends Fragment {
         inflater.inflate(R.menu.toolbar_menu, menu);
         MenuItem toolbarRemove = menu.findItem(R.id.remove_arrangements);
         MenuItem toolbarEdit = menu.findItem(R.id.edit_arrangements);
+        toolbarNotes = menu.findItem(R.id.notes);
         toolbarRemove.setVisible(false);
         toolbarEdit.setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
@@ -100,6 +137,17 @@ public class ArrangementFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.move_tasks) {
             showMoveAlert();
+            return true;
+        } else if (item.getItemId() == R.id.show_notes) {
+            if (arrangement.hasNotesEnabled()) {
+                arrangement.setNotesEnabled(false);
+                notes.setVisibility(View.GONE);
+                saveArrangementToStorage();
+            } else {
+                arrangement.setNotesEnabled(true);
+                notes.setVisibility(View.VISIBLE);
+                saveArrangementToStorage();
+            }
             return true;
         }
         return false;
@@ -178,7 +226,7 @@ public class ArrangementFragment extends Fragment {
 
         // Sort the new task list and notify adapter.
         Collections.sort(tasks, new TaskComparator());
-        arrangementTaskAdapter.notifyDataSetChanged();
+        arrangementAdapter.notifyDataSetChanged();
 
         // Save new task list in storage.
         ArrayList<Arrangement> arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
@@ -202,5 +250,12 @@ public class ArrangementFragment extends Fragment {
                 })
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    private void saveArrangementToStorage() {
+        arrangement.addNotes(notes.getText().toString());
+        ArrayList<Arrangement> arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
+        arrangementsList.set(arrangement.getListIndex(), arrangement);
+        storageReaderWriter.writeList("arrangements.json", arrangementsList);
     }
 }

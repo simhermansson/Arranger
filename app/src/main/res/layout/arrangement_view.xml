@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:descendantFocusability="blocksDescendants"
     android:background="@color/cardview_light_background">
 
     <TextView
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:text="@string/placeholder"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:textSize="24sp"
@@ -28,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
+        android:paddingBottom="4dp"
         android:text="@string/zero_tasks"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="18sp"
@@ -40,10 +42,22 @@
         android:id="@+id/checkBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/move_single_arrangement"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/move_single_arrangement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="8dp"
+        android:background="?android:selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/checkBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/checkBox"
+        app:srcCompat="@drawable/ic_move_to_inbox_grey_24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

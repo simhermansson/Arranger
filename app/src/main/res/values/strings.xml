@@ -14,4 +14,5 @@
     <string name="channel_name">ALARM_SERVICE</string>
     <string name="channel_description">ALARM_SERVICE</string>
     <string name="zero_tasks">0 tasks</string>
+    <string name="notes">Add notes or instructions here.</string>
 </resources>
