@@ -130,14 +130,31 @@ public class ArrangementListAdapter extends ArrayAdapter<Arrangement> {
     }
 
     public void moveCheckedItems() {
-        ArrayList<Task> toBeMoved = new ArrayList<>();
+        // Load today list.
+        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
+
         for (Arrangement arrangement : arrangements) {
             if (arrangement.isChecked()) {
-                toBeMoved.addAll(arrangement.getTasks());
+                // Move tasks to today list.
+                for (Task task : arrangement.getTasks()) {
+                    // Add to today list and schedule notifications if needed.
+                    todayList.add(task);
+                    notificationSchedule.toSchedule(task);
+
+                    // Check if scheduled, if so; put in correct schedule list.
+                    Repeat repeat = task.getRepeats();
+                    boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
+                    if (notScheduledForToday) {
+                        ArrayList<Task> tasks = new StorageReaderWriter(mainActivity).readTaskList(repeat.toString() + ".json");
+                        tasks.add(task);
+                        storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
+                    }
+                }
             }
         }
-        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
-        todayList.addAll(toBeMoved);
+
+        // Sort and write new today list.
+        Collections.sort(todayList, new TaskComparator());
         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
     }
 
@@ -153,13 +170,26 @@ public class ArrangementListAdapter extends ArrayAdapter<Arrangement> {
     private void showMoveAlert(final Arrangement arrangement) {
         new AlertDialog.Builder(context)
                 .setTitle("Copy Arrangement")
-                .setMessage("Copy arrangement tasks to today?")
+                .setMessage("Copy arrangement to today?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Move tasks to today list.
                         ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
-                        todayList.addAll(arrangement.getTasks());
+                        for (Task task : arrangement.getTasks()) {
+                            // Add to today list and schedule notifications if needed.
+                            todayList.add(task);
+                            notificationSchedule.toSchedule(task);
+
+                            // Check if scheduled, if so; put in correct schedule list.
+                            Repeat repeat = task.getRepeats();
+                            boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
+                            if (notScheduledForToday) {
+                                ArrayList<Task> tasks = new StorageReaderWriter(mainActivity).readTaskList(repeat.toString() + ".json");
+                                tasks.add(task);
+                                storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
+                            }
+                        }
                         Collections.sort(todayList, new TaskComparator());
                         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
                     }

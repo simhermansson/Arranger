@@ -80,6 +80,7 @@ public class ArrangementFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     // Save notes to arrangement and to storage.
+                    arrangement.addNotes(notes.getText().toString());
                     saveArrangementToStorage();
                 }
             }
@@ -96,6 +97,7 @@ public class ArrangementFragment extends Fragment {
                     notes.clearFocus();
 
                     // Save notes to arrangement and to storage.
+                    arrangement.addNotes(notes.getText().toString());
                     saveArrangementToStorage();
                 }
                 return true;
@@ -153,10 +155,12 @@ public class ArrangementFragment extends Fragment {
             if (arrangement.hasNotesEnabled()) {
                 arrangement.setNotesEnabled(false);
                 notes.setVisibility(View.GONE);
+                arrangement.addNotes(notes.getText().toString());
                 saveArrangementToStorage();
             } else {
                 arrangement.setNotesEnabled(true);
                 notes.setVisibility(View.VISIBLE);
+                arrangement.addNotes(notes.getText().toString());
                 saveArrangementToStorage();
             }
             return true;
@@ -239,15 +243,12 @@ public class ArrangementFragment extends Fragment {
         Collections.sort(tasks, new TaskComparator());
         arrangementAdapter.notifyDataSetChanged();
 
-        // Save new task list in storage.
-        ArrayList<Arrangement> arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
-        arrangementsList.set(arrangement.getListIndex(), arrangement);
-        storageReaderWriter.writeList("arrangements.json", arrangementsList);
+        saveArrangementToStorage();
     }
 
     private void showMoveAlert() {
         new AlertDialog.Builder(activity)
-                .setTitle("Copy Arrangement")
+                .setTitle("Copy Tasks")
                 .setMessage("Copy tasks to today?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -255,8 +256,18 @@ public class ArrangementFragment extends Fragment {
                         // Move tasks to today list.
                         ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
                         for (Task task : tasks) {
+                            // Add to today list and schedule notifications if needed.
                             todayList.add(task);
                             notificationSchedule.toSchedule(task);
+
+                            // Check if scheduled, if so; put in correct schedule list.
+                            Repeat repeat = task.getRepeats();
+                            boolean notScheduledForToday = !Repeat.TODAY.equals(repeat);
+                            if (notScheduledForToday) {
+                                ArrayList<Task> tasks = new StorageReaderWriter(activity).readTaskList(repeat.toString() + ".json");
+                                tasks.add(task);
+                                storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
+                            }
                         }
                         Collections.sort(todayList, new TaskComparator());
                         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
@@ -267,7 +278,6 @@ public class ArrangementFragment extends Fragment {
     }
 
     private void saveArrangementToStorage() {
-        arrangement.addNotes(notes.getText().toString());
         ArrayList<Arrangement> arrangementsList = storageReaderWriter.readArrangementList("arrangements.json");
         arrangementsList.set(arrangement.getListIndex(), arrangement);
         storageReaderWriter.writeList("arrangements.json", arrangementsList);
