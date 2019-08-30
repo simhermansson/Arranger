@@ -26,6 +26,7 @@ import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.listview_adapters.TaskAdapter;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.Collections;

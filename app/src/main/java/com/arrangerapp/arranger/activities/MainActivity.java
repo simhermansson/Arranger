@@ -42,16 +42,18 @@ public class MainActivity extends AppCompatActivity {
         // Set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DrawerLayout drawerLayout = findViewById(R.id.drawer);
                 drawerLayout.openDrawer(GravityCompat.START);
-                TextView headerText = (TextView) drawerLayout.findViewById(R.id.drawerHeaderText);
+                TextView headerText = drawerLayout.findViewById(R.id.drawerHeaderText);
                 headerText.setText(R.string.app_name);
             }
         });
@@ -78,11 +80,8 @@ public class MainActivity extends AppCompatActivity {
                         switch(menuItem.getItemId()) {
                             case R.id.nav_day:
                                 if (!State.TODAY.equals(currentState)) {
-                                    // Clear back stack.
-                                    FragmentManager fm = getSupportFragmentManager();
-                                    for (int i = 0; i < fm.getBackStackEntryCount(); i++) {
-                                        fm.popBackStack();
-                                    }
+                                    // Clear back stack
+                                    getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new TodayFragment());
@@ -94,7 +93,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (!State.WEEK.equals(currentState)) {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new WeekFragment());
-                                    ft.addToBackStack(null);
+                                    if (currentState == State.TODAY) {
+                                        ft.addToBackStack(null);
+                                    }
                                     ft.commit();
                                     currentState = State.WEEK;
                                 }
@@ -103,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (!State.ARRANGEMENTS.equals(currentState)) {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new ArrangementListFragment());
-                                    ft.addToBackStack(null);
+                                    if (currentState == State.TODAY) {
+                                        ft.addToBackStack(null);
+                                    }
                                     ft.commit();
                                     currentState = State.ARRANGEMENTS;
                                 }
@@ -120,6 +123,17 @@ public class MainActivity extends AppCompatActivity {
         );
 
         new DailyTaskReschedule(this).getAndScheduleTasks();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (currentState != State.ARRANGEMENT) {
+            // Set correct state and menu item checked.
+            currentState = State.TODAY;
+            final NavigationView navigationView = findViewById(R.id.navigation);
+            navigationView.getMenu().getItem(0).setChecked(true);
+        }
+        super.onBackPressed();
     }
 
     public void openArrangement(Arrangement arrangement) {

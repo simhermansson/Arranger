@@ -14,6 +14,7 @@ import com.arrangerapp.arranger.R;
 import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.listview_adapters.WeekTaskExpandableAdapter;
 import com.arrangerapp.arranger.objects.Task;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.HashMap;

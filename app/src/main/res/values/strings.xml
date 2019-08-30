@@ -9,7 +9,7 @@
     <string name="arrangement_hint">e.g. \"Travelling checklist\"</string>
     <string name="arrangement_task_hint">e.g. \"Pack bags\"</string>
     <string name="no_tasks">No more tasks for today!\nAdd more by pressing the red button below.</string>
-    <string name="no_arrangements">No arrangements here!\nAdd more by pressing the red button below.</string>
+    <string name="no_arrangements">Arrangements are best used for recurring checklists, such as grocery lists.</string>
     <string name="no_arrangement_tasks">No tasks here yet!\nAdd more by pressing the red button below.</string>
     <string name="channel_name">ALARM_SERVICE</string>
     <string name="channel_description">ALARM_SERVICE</string>

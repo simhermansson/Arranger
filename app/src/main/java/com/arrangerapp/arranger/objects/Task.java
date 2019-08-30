@@ -100,7 +100,6 @@ public class Task implements Parcelable {
             }
 
             // Parse the time format
-            // TODO make this better. And if no am/pm and no 24 hour time, check current time.
             if (time != null) {
 
                 if (hour != null) {
