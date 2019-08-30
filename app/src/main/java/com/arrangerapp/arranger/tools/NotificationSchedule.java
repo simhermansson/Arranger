@@ -6,6 +6,7 @@ import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import com.arrangerapp.arranger.enums.Repeat;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.workers.NotificationWorker;
 
@@ -66,5 +67,19 @@ public class NotificationSchedule {
     public void cancelScheduledNotification(int id) {
         // The task has a tag with its id as a tag, this cancels that task work
         WorkManager.getInstance(context).cancelAllWorkByTag(String.valueOf(id));
+    }
+
+    public void toSchedule(Task task) {
+        // Get current day of week with correct Repeat indexing.
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+
+        // Booleans for checking if task is scheduled for today or is a daily task.
+        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
+        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
+        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+
+        if ((oneTimeTask && task.hasDate()) || scheduledForToday || scheduledDaily) {
+            scheduleNotification(task);
+        }
     }
 }

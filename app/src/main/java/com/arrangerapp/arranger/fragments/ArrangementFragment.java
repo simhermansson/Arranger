@@ -31,6 +31,7 @@ import com.arrangerapp.arranger.listview_adapters.ArrangementAdapter;
 import com.arrangerapp.arranger.objects.Arrangement;
 import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
+import com.arrangerapp.arranger.tools.NotificationSchedule;
 import com.arrangerapp.arranger.tools.StorageReaderWriter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -43,9 +44,8 @@ public class ArrangementFragment extends Fragment {
     private ArrayList<Task> tasks;
     private ArrangementAdapter arrangementAdapter;
     private StorageReaderWriter storageReaderWriter;
+    private NotificationSchedule notificationSchedule;
     private EditText notes;
-    private MenuItem toolbarMoveToToday;
-    private MenuItem toolbarNotes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +73,17 @@ public class ArrangementFragment extends Fragment {
         if (arrangement.hasNotes()) {
             notes.setText(arrangement.getNotes());
         }
+
+        // Listening for lost focus on notes.
+        notes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    // Save notes to arrangement and to storage.
+                    saveArrangementToStorage();
+                }
+            }
+        });
 
         // Listening for done press on keyboard.
         notes.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -120,6 +131,7 @@ public class ArrangementFragment extends Fragment {
         super.onAttach(context);
         activity = (MainActivity) context;
         storageReaderWriter = new StorageReaderWriter(activity);
+        notificationSchedule = new NotificationSchedule(activity);
     }
 
     @Override
@@ -127,7 +139,6 @@ public class ArrangementFragment extends Fragment {
         inflater.inflate(R.menu.toolbar_menu, menu);
         MenuItem toolbarRemove = menu.findItem(R.id.remove_arrangements);
         MenuItem toolbarEdit = menu.findItem(R.id.edit_arrangements);
-        toolbarNotes = menu.findItem(R.id.notes);
         toolbarRemove.setVisible(false);
         toolbarEdit.setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
@@ -237,13 +248,16 @@ public class ArrangementFragment extends Fragment {
     private void showMoveAlert() {
         new AlertDialog.Builder(activity)
                 .setTitle("Copy Arrangement")
-                .setMessage("Copy arrangement tasks to today?")
+                .setMessage("Copy tasks to today?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Move tasks to today list.
                         ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
-                        todayList.addAll(tasks);
+                        for (Task task : tasks) {
+                            todayList.add(task);
+                            notificationSchedule.toSchedule(task);
+                        }
                         Collections.sort(todayList, new TaskComparator());
                         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);
                     }

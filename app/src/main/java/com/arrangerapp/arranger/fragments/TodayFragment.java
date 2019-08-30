@@ -3,7 +3,6 @@ package com.arrangerapp.arranger.fragments;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.arrangerapp.arranger.tools.DailyTaskReschedule;
@@ -29,7 +28,6 @@ import com.arrangerapp.arranger.objects.Task;
 import com.arrangerapp.arranger.objects.TaskComparator;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 
 
@@ -143,25 +141,11 @@ public class TodayFragment extends Fragment {
     private void createTask(String input) {
         Task task = new Task(input);
 
-        // Get current day of week with correct Repeat indexing.
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+        // Schedule task if needed.
+        notificationSchedule.toSchedule(task);
 
-        // Booleans for checking if task is scheduled for today or is a daily task.
-        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
-        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
-        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
-
-        if (oneTimeTask) {
-            taskList.add(task);
-            if (task.hasDate()) {
-                notificationSchedule.scheduleNotification(task);
-            }
-        } else if (scheduledForToday || scheduledDaily) {
-            taskList.add(task);
-            notificationSchedule.scheduleNotification(task);
-        }
-
-        // Sort the new task list.
+        // Add task to taskList, sort the new taskList and notify listAdapter.
+        taskList.add(task);
         Collections.sort(taskList, new TaskComparator());
         taskAdapter.notifyDataSetChanged();
 
