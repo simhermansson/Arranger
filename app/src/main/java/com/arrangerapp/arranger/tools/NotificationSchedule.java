@@ -79,7 +79,17 @@ public class NotificationSchedule {
         boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
 
         if ((oneTimeTask && task.hasDate()) || scheduledForToday || scheduledDaily) {
-            scheduleNotification(task);
+            // Set up calendar for current time and task time.
+            Calendar now = Calendar.getInstance();
+            Calendar taskCalendar = Calendar.getInstance();
+            taskCalendar.set(Calendar.HOUR_OF_DAY, task.getDate().getHours());
+            taskCalendar.set(Calendar.MINUTE, task.getDate().getMinutes());
+            taskCalendar.set(Calendar.SECOND, 0);
+
+            // Only schedule if task is scheduled in the future.
+            if (now.getTimeInMillis() < taskCalendar.getTimeInMillis()) {
+                scheduleNotification(task);
+            }
         }
     }
 }
