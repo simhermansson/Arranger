@@ -37,8 +37,8 @@ public class WeekFragment extends Fragment {
         activity.setTitle("Week");
 
         // Read tasks from storage and assign them to the correct lists
-        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
         ArrayList<Task> everyDayList = storageReaderWriter.readTaskList(Repeat.DAILY.toString() + ".json");
+        ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
         ArrayList<Task> mondayList = storageReaderWriter.readTaskList(Repeat.MONDAY.toString() + ".json");
         ArrayList<Task> tuesdayList = storageReaderWriter.readTaskList(Repeat.TUESDAY.toString() + ".json");
         ArrayList<Task> wednesdayList = storageReaderWriter.readTaskList(Repeat.WEDNESDAY.toString() + ".json");
@@ -49,8 +49,8 @@ public class WeekFragment extends Fragment {
 
         // Create a HashMap and put in all the lists
         HashMap<String, ArrayList<Task>> expandableTaskList = new HashMap<>();
-        expandableTaskList.put(Repeat.TODAY.toString(), todayList);
         expandableTaskList.put(Repeat.DAILY.toString(), everyDayList);
+        expandableTaskList.put(Repeat.TODAY.toString(), todayList);
         expandableTaskList.put(Repeat.MONDAY.toString(), mondayList);
         expandableTaskList.put(Repeat.TUESDAY.toString(), tuesdayList);
         expandableTaskList.put(Repeat.WEDNESDAY.toString(), wednesdayList);
@@ -61,8 +61,8 @@ public class WeekFragment extends Fragment {
 
         // Create and sort a list of the keys in the HashMap
         ArrayList<String> expandableTitleList = new ArrayList<>();
-        expandableTitleList.add(Repeat.TODAY.toString());
         expandableTitleList.add(Repeat.DAILY.toString());
+        expandableTitleList.add(Repeat.TODAY.toString());
         expandableTitleList.add(Repeat.MONDAY.toString());
         expandableTitleList.add(Repeat.TUESDAY.toString());
         expandableTitleList.add(Repeat.WEDNESDAY.toString());

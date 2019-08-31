@@ -33,9 +33,11 @@ public class Task implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
-        dest.writeLong(date.getTime());
         dest.writeInt(repeats.ordinal());
         dest.writeByte((byte) (hasDate ? 1 : 0));
+        if (hasDate) {
+            dest.writeLong(date.getTime());
+        }
         dest.writeInt(id);
     }
 
@@ -54,9 +56,11 @@ public class Task implements Parcelable {
 
     private Task(Parcel in) {
         name = in.readString();
-        date = new Date(in.readLong());
         repeats = Repeat.values()[in.readInt()];
         hasDate = in.readByte() != 0;
+        if (hasDate) {
+            date = new Date(in.readLong());
+        }
         id = in.readInt();
     }
 
