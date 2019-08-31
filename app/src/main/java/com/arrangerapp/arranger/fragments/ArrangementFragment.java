@@ -37,6 +37,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
 public class ArrangementFragment extends Fragment {
@@ -257,8 +258,21 @@ public class ArrangementFragment extends Fragment {
                         // Move tasks to today list.
                         ArrayList<Task> todayList = storageReaderWriter.readTaskList(Repeat.TODAY.toString() + ".json");
                         for (Task task : tasks) {
-                            // Add to today list and schedule notifications if needed.
-                            todayList.add(task);
+
+                            // Get current day of week with correct Repeat indexing.
+                            int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+
+                            // Booleans for checking if task is scheduled for today or is a daily task.
+                            boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
+                            boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
+                            boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+
+                            // Add task to taskList, sort the new taskList and notify listAdapter if task scheduled for today.
+                            if (oneTimeTask || scheduledForToday || scheduledDaily) {
+                                todayList.add(task);
+                            }
+
+                            // Schedule notifications if needed.
                             notificationSchedule.toSchedule(task);
 
                             // Check if scheduled, if so; put in correct schedule list.
@@ -269,6 +283,7 @@ public class ArrangementFragment extends Fragment {
                                 tasks.add(task);
                                 storageReaderWriter.writeList(repeat.toString() + ".json", tasks);
                             }
+
                         }
                         Collections.sort(todayList, new TaskComparator());
                         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", todayList);

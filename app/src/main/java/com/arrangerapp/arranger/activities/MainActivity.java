@@ -94,9 +94,11 @@ public class MainActivity extends AppCompatActivity {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new WeekFragment());
                                     if (currentState == State.TODAY) {
-                                        ft.addToBackStack(null);
+                                        ft.addToBackStack("TodayFragment");
+                                    } else if (currentState == State.ARRANGEMENT) {
+                                        getSupportFragmentManager().popBackStack("ArrangementFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
-                                    ft.commit();
+                                ft.commit();
                                     currentState = State.WEEK;
                                 }
                                 break;
@@ -105,7 +107,9 @@ public class MainActivity extends AppCompatActivity {
                                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                                     ft.replace(R.id.placeholder, new ArrangementListFragment());
                                     if (currentState == State.TODAY) {
-                                        ft.addToBackStack(null);
+                                        ft.addToBackStack("TodayFragment");
+                                    } else if (currentState == State.ARRANGEMENT) {
+                                        getSupportFragmentManager().popBackStack("ArrangementFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
                                     ft.commit();
                                     currentState = State.ARRANGEMENTS;
@@ -132,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
             currentState = State.TODAY;
             final NavigationView navigationView = findViewById(R.id.navigation);
             navigationView.getMenu().getItem(0).setChecked(true);
+        } else {
+            currentState = State.ARRANGEMENTS;
         }
         super.onBackPressed();
     }
@@ -140,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         ft.replace(R.id.placeholder, ArrangementFragment.newInstance(arrangement));
-        ft.addToBackStack(null);
+        ft.addToBackStack("ArrangementFragment");
         ft.commit();
         currentState = State.ARRANGEMENT;
     }

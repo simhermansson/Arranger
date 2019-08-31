@@ -29,6 +29,7 @@ import com.arrangerapp.arranger.objects.TaskComparator;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
 
@@ -145,10 +146,20 @@ public class TodayFragment extends Fragment {
         // Schedule task if needed.
         notificationSchedule.toSchedule(task);
 
-        // Add task to taskList, sort the new taskList and notify listAdapter.
-        taskList.add(task);
-        Collections.sort(taskList, new TaskComparator());
-        taskAdapter.notifyDataSetChanged();
+        // Get current day of week with correct Repeat indexing.
+        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+
+        // Booleans for checking if task is scheduled for today or is a daily task.
+        boolean oneTimeTask = task.getRepeats().equals(Repeat.TODAY);
+        boolean scheduledForToday = task.getRepeats().equals(Repeat.values()[dayOfWeek]);
+        boolean scheduledDaily = task.getRepeats().equals(Repeat.DAILY);
+
+        // Add task to taskList, sort the new taskList and notify listAdapter if task scheduled for today.
+        if (oneTimeTask || scheduledForToday || scheduledDaily) {
+            taskList.add(task);
+            Collections.sort(taskList, new TaskComparator());
+            taskAdapter.notifyDataSetChanged();
+        }
 
         // Save task list to internal storage and task to correct schedule if so needed.
         storageReaderWriter.writeList(Repeat.TODAY.toString() + ".json", taskList);
