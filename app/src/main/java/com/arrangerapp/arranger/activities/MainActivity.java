@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                         }
 
-                        // Close drawer
+                        // Close drawer.
                         DrawerLayout drawerLayout = findViewById(R.id.drawer);
                         drawerLayout.closeDrawer(GravityCompat.START);
 

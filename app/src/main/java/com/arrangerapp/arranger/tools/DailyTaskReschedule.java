@@ -48,7 +48,7 @@ public class DailyTaskReschedule {
                 .build();
 
         // Enqueue the OneTimeWorkRequest
-        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.APPEND, enqueueNotification);
+        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, enqueueNotification);
     }
 
     /**
@@ -89,7 +89,7 @@ public class DailyTaskReschedule {
 
             // Get String for previous day
             String previousDay;
-            if (dayOfWeekInt == 1) {
+            if (dayOfWeekInt == 0) {
                 previousDay = Repeat.values()[6].toString();
             } else {
                 previousDay = Repeat.values()[dayOfWeekInt-1].toString();
