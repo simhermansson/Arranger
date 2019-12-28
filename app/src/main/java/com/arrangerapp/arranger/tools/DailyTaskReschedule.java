@@ -3,8 +3,10 @@ package com.arrangerapp.arranger.tools;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.arrangerapp.arranger.enums.Repeat;
@@ -42,6 +44,11 @@ public class DailyTaskReschedule {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
+        // Create a PeriodicWorkRequest object and enqueue it
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(TaskRescheduleWorker.class, 1, TimeUnit.HOURS).build();
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, periodicWorkRequest);
+
+        /*
         // Create a OneTimeWorkRequest object and enqueue it
         OneTimeWorkRequest enqueueNotification = new OneTimeWorkRequest.Builder(TaskRescheduleWorker.class)
                 .setInitialDelay(calendar.getTimeInMillis() - current.getTimeInMillis(), TimeUnit.MILLISECONDS)
@@ -49,6 +56,7 @@ public class DailyTaskReschedule {
 
         // Enqueue the OneTimeWorkRequest
         WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, enqueueNotification);
+        */
     }
 
     /**
